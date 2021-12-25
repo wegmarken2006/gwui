@@ -1,4 +1,4 @@
-package ghui
+package gwui
 
 import (
 	. "fmt"
@@ -42,7 +42,7 @@ type GuiCfg struct {
 	fh   fp.File
 	fjs  fp.File
 	fcss fp.File
-	body *Elem
+	Body *Elem
 }
 
 func (e *Elem) WriteTextArea(text string) {
@@ -193,29 +193,29 @@ func (gc *GuiCfg) GWInit(title string) Elem {
 }
 
 func (gc *GuiCfg) GWChangeText(el Elem, text string) {
-	if gc.body.gs != nil {
+	if gc.Body.gs != nil {
 		toSend := Sprintf("TEXT@%s@%s", el.id, text)
-		gc.body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
+		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
-		Println("No Change Text, Set", gc.body.id, "Callback!")
+		Println("No Change Text, Set", gc.Body.id, "Callback!")
 	}
 }
 
 func (gc *GuiCfg) GWChangeColor(el Elem, text string) {
-	if gc.body.gs != nil {
+	if gc.Body.gs != nil {
 		toSend := Sprintf("COLOR@%s@%s", el.id, text)
-		gc.body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
+		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
-		Println("No Change Color, Set", gc.body.id, "Callback!")
+		Println("No Change Color, Set", gc.Body.id, "Callback!")
 	}
 }
 
 func (gc *GuiCfg) GWChangeBackgroundColor(el Elem, text string) {
-	if gc.body.gs != nil {
+	if gc.Body.gs != nil {
 		toSend := Sprintf("BCOLOR@%s@%s", el.id, text)
-		gc.body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
+		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
-		Println("No Change Back Color, Set", gc.body.id, "Callback!")
+		Println("No Change Back Color, Set", gc.Body.id, "Callback!")
 	}
 }
 
