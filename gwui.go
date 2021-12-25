@@ -62,19 +62,19 @@ func (e *Elem) Add(n Elem) {
 	e.js = e.js + n.js
 }
 
-func (e *Elem) Callback(fn func()) {
+func (e *Elem) Callback(fn func(string)) {
 	addr := Sprintf("/%s", e.id)
 	if e.elType == ButtonT {
 		http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
-			fn()
+			fn("")
 		})
 	} else if e.elType == ITextT {
 		http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
 			buf := make([]byte, BUFFER_SIZE)
-			tt := r.Body
-			tt.Read(buf)
-			Println(buf)
-			fn()
+			inp := r.Body
+			inp.Read(buf)
+			buf = buf[:r.ContentLength]
+			fn(string(buf))
 		})
 
 	} else if e.elType == TextAreaT || e.elType == BodyT {
@@ -86,11 +86,10 @@ func (e *Elem) Callback(fn func()) {
 				text := Sprintf("wsEndPoint %s, %s", e.id, err)
 				Println(text)
 			}
-			fn()
+			fn("")
 		})
 	}
 }
-
 
 func (gc *GuiCfg) GWRun() {
 
@@ -98,7 +97,6 @@ func (gc *GuiCfg) GWRun() {
 	go func() {
 		for {
 			portStr := Sprintf(":%d", port)
-			Println(portStr)
 			text := Sprintf("Serving on http://localhost%s", portStr)
 			Println(text)
 			err := http.ListenAndServe(portStr, nil)
@@ -257,7 +255,7 @@ func (gc *GuiCfg) GWButton(bType string, id string, text string) Elem {
 
 func (gc *GuiCfg) GWInputText(id string) Elem {
 	hStart := Sprintf(`
-	<input type="text" id="%s" name="%s" onkeypress="%s_func()">
+	<input type="text" class="m-2" id="%s" name="%s" onkeypress="%s_func(event)">
 	`, id, id, id)
 	e := Elem{hStart: hStart, hEnd: "", html: hStart, id: id, elType: ITextT}
 	addr := Sprintf("/%s", e.id)
@@ -305,9 +303,9 @@ func (gc *GuiCfg) GWTextArea(id string, rows int) Elem {
 				str = text.value + str;
 				diff = str.length - 4096;
 				if (diff > 0) {
-					text.value = str.slice(diff);
+					text.value = str.slice(diff) + '\n';
 				} else {
-					text.value = str;
+					text.value = str + '\n';
 				}
 			}
 		}
