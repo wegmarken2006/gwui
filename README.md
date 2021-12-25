@@ -70,7 +70,7 @@ func main() {
 	gc.GWRun()
 
 	reader := bufio.NewReader(os.Stdin)
-	Println("Press:\n q to exit")
+	Println("Press:\n q<Enter> to exit")
 	for {
 			text, _ := reader.ReadString('\n')
 			//cut final 0xd, 0xa
