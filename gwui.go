@@ -20,23 +20,29 @@ var upgrader = websocket.Upgrader{
 const STARTING_PORT = 9000
 
 const (
-	ButtonT   = 0
-	TextAreaT = 1
-	LabelT    = 2
-	RowT      = 3
-	ColT      = 4
-	BodyT     = 5
-	ITextT    = 6
+	ButtonT    = 0
+	TextAreaT  = 1
+	LabelT     = 2
+	RowT       = 3
+	ColT       = 4
+	BodyT      = 5
+	ITextT     = 6
+	TabsT      = 7
+	TPaneT     = 8
+	ParagraphT = 9
 )
 
 type Elem struct {
-	elType int
-	hStart string
-	hEnd   string
-	html   string
-	js     string
-	id     string
-	gs     *websocket.Conn
+	elType   int
+	hStart   string
+	hEnd     string
+	html     string
+	js       string
+	id       string
+	gs       *websocket.Conn
+	SubElems []Elem
+	subStart string
+	subEnd   string
 }
 type GuiCfg struct {
 	fh   fp.File
@@ -60,6 +66,12 @@ func (e *Elem) WriteTextArea(text string) {
 func (e *Elem) Add(n Elem) {
 	e.html = e.html + n.html + n.hEnd
 	e.js = e.js + n.js
+	e.html = e.html + n.subStart
+	for _, se := range n.SubElems {
+		e.html = e.html + se.html + se.hEnd
+		e.js = e.js + se.js
+	}
+	e.html = e.html + n.subEnd
 }
 
 func (e *Elem) Callback(fn func(string)) {
@@ -208,6 +220,14 @@ func (gc *GuiCfg) GWChangeColor(el Elem, text string) {
 	}
 }
 
+func (gc *GuiCfg) GWSetBackgroundColor(el Elem, text string) {
+	js := Sprintf(`
+	var item = document.getElementById(%s);
+	item.style.color = %s;		
+	`, el.id, text)
+	el.js = el.js + js
+}
+
 func (gc *GuiCfg) GWChangeBackgroundColor(el Elem, text string) {
 	if gc.Body.gs != nil {
 		toSend := Sprintf("BCOLOR@%s@%s", el.id, text)
@@ -217,6 +237,62 @@ func (gc *GuiCfg) GWChangeBackgroundColor(el Elem, text string) {
 	}
 }
 
+func (gc *GuiCfg) GWTabs(ids []string, texts []string) Elem {
+	var elems []Elem
+	hText := `
+	<ul class="nav nav-tabs">
+	`
+	for ind, id := range ids {
+		var linkType string
+		if ind == 0 {
+			linkType = "active"
+		} else {
+			linkType = ""
+		}
+
+		hText = Sprintf(`
+		%s
+		<li class="nav-item" role="presentation">
+            <a class="nav-link %s" data-bs-toggle="tab" data-bs-target="#%s" id="t_%s">%s</a>
+        </li>
+		`, hText, linkType, id, id, texts[ind])
+
+	}
+	hText = Sprintf(`
+	%s
+	</ul>
+	`, hText)
+	tabs := Elem{hStart: hText, hEnd: "", html: hText, id: "tabs", elType: TabsT, js: ""}
+
+	for ind, id := range ids {
+		var paneType string
+		if ind == 0 {
+			paneType = "show active"
+		} else {
+			paneType = "fade"
+		}
+		hStart := Sprintf(`
+		<div class="tab-pane %s" id="%s">
+		`, paneType, id)
+		hEnd := `
+		</div>`
+		e := Elem{hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: TPaneT, js: ""}
+		elems = append(elems, e)
+	}
+	tabs.subStart = `<div class="tab-content">`
+	tabs.subEnd = `</div>`
+	tabs.SubElems = elems
+	return tabs
+}
+
+func (gc *GuiCfg) GWParagraph(id string) Elem {
+	hStart := Sprintf(`
+	<p id="%s">`, id)
+	hEnd := `
+	</p>`
+	e := Elem{hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: ParagraphT, js: ""}
+	return e
+}
 func (gc *GuiCfg) GWRow(id string) Elem {
 	hStart := Sprintf(`
 	<div class="row" id="%s">`, id)
