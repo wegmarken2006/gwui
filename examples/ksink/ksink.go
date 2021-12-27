@@ -42,6 +42,10 @@ func main() {
 		ta1.WriteTextArea(text)
 	})
 
+	dd5.Callback(func(value string) {
+		gc.GWChangeFontFamily(ta1, value)
+	})
+
 	gc.GWSetBackgroundColor(&ta1, "#ffe6e6")
 	gc.GWSetColor(&ta1, "blue")
 	gc.GWSetFontSize(&ta1, "small")

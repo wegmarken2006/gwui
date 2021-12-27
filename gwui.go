@@ -89,7 +89,7 @@ func (e *Elem) Callback(fn func(string)) {
 		http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
 			fn("")
 		})
-	} else if e.elType == ITextT {
+	} else if e.elType == ITextT || e.elType == DDownT {
 		http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
 			buf := make([]byte, BUFFER_SIZE)
 			inp := r.Body
@@ -255,7 +255,7 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
 		}
 		if (type === "FONTFAMILY") {
 			var font = messages[2];
-			item.style.font  = font;
+			item.style.fontFamily  = font;
 		}
 
 		
@@ -419,10 +419,10 @@ func (gc *GuiCfg) GWB5Col(id string) Elem {
 func (gc *GuiCfg) GWB5DropDown(bType string, id string, text string, list []string) Elem {
 	hText := Sprintf(`
 	<div class="dropdown">
-  	<button class="btn %s m-2 dropdown-toggle" type="button" id="%s" data-bs-toggle="dropdown" aria-expanded="false">
+  	<button class="btn %s m-2 dropdown-toggle" type="button" id="%s" data-bs-toggle="dropdown" aria-expanded="false" >
     %s
   	</button>
-  	<ul class="dropdown-menu" aria-labelledby="%s">`, bType, id, text, id)
+  	<ul class="dropdown-menu" aria-labelledby="%s" id="%s%s" onclick="%s_func(event)">`, bType, id, text, id, id, id, id)
 
 	for _, elem := range list {
 		hText = Sprintf(`%s
@@ -436,10 +436,11 @@ func (gc *GuiCfg) GWB5DropDown(bType string, id string, text string, list []stri
 
 	addr := Sprintf("/%s", e.id)
 	e.js = Sprintf(`
-	function %s_func() {
+	function %s_func(e) {
 		xhr = new XMLHttpRequest();
 		xhr.open("POST", "%s", true);
-		xhr.send();
+		var val = e.target.innerHTML;
+		xhr.send(val);
 	}
 	`, e.id, addr)
 
