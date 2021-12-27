@@ -1,6 +1,7 @@
 package gwui
 
 import (
+	"bufio"
 	. "fmt"
 	"net/http"
 	"os"
@@ -32,6 +33,7 @@ const (
 	TabsT      = 7
 	TPaneT     = 8
 	ParagraphT = 9
+	DDownT     = 10
 )
 
 type Elem struct {
@@ -174,6 +176,21 @@ func (gc *GuiCfg) GWClose(body Elem) {
 
 }
 
+func (gc *GuiCfg) GWWaitKeyFromCOnsole() {
+	//Wait for a key press
+	reader := bufio.NewReader(os.Stdin)
+	Println("Press:\n q<Enter> to exit")
+	for {
+		text, _ := reader.ReadString('\n')
+		//cut final 0xd, 0xa
+		text = text[:len(text)-2]
+		switch text {
+		case "q", "Q":
+			os.Exit(0)
+		}
+	}
+}
+
 func (gc *GuiCfg) GWB5Init(title string) Elem {
 
 	if _, err := os.Stat("./static"); os.IsNotExist(err) {
@@ -236,6 +253,10 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
 			var fsize = messages[2];
 			item.style.fontSize  = fsize;
 		}
+		if (type === "FONTFAMILY") {
+			var font = messages[2];
+			item.style.font  = font;
+		}
 
 		
 	};
@@ -250,7 +271,16 @@ func (gc *GuiCfg) GWChangeText(el Elem, text string) {
 		toSend := Sprintf("TEXT@%s@%s", el.id, text)
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
-		Println("No Change Text, Set", gc.Body.id, "Callback!")
+		Println("Failed Text change, Set", gc.Body.id, "Callback!")
+	}
+}
+
+func (gc *GuiCfg) GWChangeFontFamily(el Elem, text string) {
+	if gc.Body.gs != nil {
+		toSend := Sprintf("FONTFAMILY@%s@%s", el.id, text)
+		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
+	} else {
+		Println("Failed Font change, Set", gc.Body.id, "Callback!")
 	}
 }
 
@@ -259,7 +289,7 @@ func (gc *GuiCfg) GWChangeColor(el Elem, text string) {
 		toSend := Sprintf("COLOR@%s@%s", el.id, text)
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
-		Println("Failed Change Color, Set", gc.Body.id, "Callback!")
+		Println("Failed Color change, Set", gc.Body.id, "Callback!")
 	}
 }
 
@@ -286,12 +316,21 @@ func (gc *GuiCfg) GWSetFontSize(el *Elem, text string) {
 	`, el.id, text)
 	el.js = el.js + js
 }
+
+func (gc *GuiCfg) GWSetFontFamily(el *Elem, text string) {
+	js := Sprintf(`
+	var item = document.getElementById("%s");
+	item.style.fontFamily = "%s";		
+	`, el.id, text)
+	el.js = el.js + js
+}
+
 func (gc *GuiCfg) GWChangeBackgroundColor(el Elem, text string) {
 	if gc.Body.gs != nil {
 		toSend := Sprintf("BCOLOR@%s@%s", el.id, text)
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
-		Println("Failed Change Background Color, Set", gc.Body.id, "Callback!")
+		Println("Failed Background Color change, Set", gc.Body.id, "Callback!")
 	}
 }
 func (gc *GuiCfg) GWChangeFontSize(el Elem, text string) {
@@ -299,9 +338,10 @@ func (gc *GuiCfg) GWChangeFontSize(el Elem, text string) {
 		toSend := Sprintf("FONTSIZE@%s@%s", el.id, text)
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
-		Println("Failed Change Font Size, Set", gc.Body.id, "Callback!")
+		Println("Failed Font Size change, Set", gc.Body.id, "Callback!")
 	}
 }
+
 func (gc *GuiCfg) GWB5Tabs(ids []string, texts []string) Elem {
 	var elems []Elem
 	hText := `
@@ -373,6 +413,36 @@ func (gc *GuiCfg) GWB5Col(id string) Elem {
 	hEnd := `
 	</div>`
 	e := Elem{hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: ColT, js: ""}
+	return e
+}
+
+func (gc *GuiCfg) GWB5DropDown(bType string, id string, text string, list []string) Elem {
+	hText := Sprintf(`
+	<div class="dropdown">
+  	<button class="btn %s m-2 dropdown-toggle" type="button" id="%s" data-bs-toggle="dropdown" aria-expanded="false">
+    %s
+  	</button>
+  	<ul class="dropdown-menu" aria-labelledby="%s">`, bType, id, text, id)
+
+	for _, elem := range list {
+		hText = Sprintf(`%s
+		<li><a class="dropdown-item" href="#">%s</a></li>`, hText, elem)
+	}
+	hText = hText + `
+  	</ul>
+  	</div>`
+
+	e := Elem{hStart: hText, hEnd: "", html: hText, id: id, elType: DDownT}
+
+	addr := Sprintf("/%s", e.id)
+	e.js = Sprintf(`
+	function %s_func() {
+		xhr = new XMLHttpRequest();
+		xhr.open("POST", "%s", true);
+		xhr.send();
+	}
+	`, e.id, addr)
+
 	return e
 }
 
