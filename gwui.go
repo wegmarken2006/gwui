@@ -210,10 +210,10 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
     <title>%s</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet" media="screen">
     <link href="/static/web2.css" rel="stylesheet">
     <script type="text/javascript" src="https://code.jquery.com/jquery.js"></script>
-    <script type="text/javascript" src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/bootstrap/js/bootstrap.bundle.js"></script>
 
 	</head>
 
