@@ -25,7 +25,7 @@ func main() {
 	bt3 := gc.GWB5Button("btn-success", "bt3", "Change")
 	lb3 := gc.GWB5Label("lb3", "Change text size")
 
-	lb4 := gc.GWB5Label("lb4", "Input text")
+	lb4 := gc.GWB5Label("lb4", "Input text with Modal")
 	it4 := gc.GWB5InputText("i4")
 
 	lb5 := gc.GWB5Label("lb5", "Select font family")
@@ -34,13 +34,27 @@ func main() {
 
 	lb10 := gc.GWB5Label("lb5", "Another tab")
 
+	md1 := gc.GWB5Modal("m1bt1", "m2bt2", "TEXT INPUT", "Are you sure", "yes", "no")
+	body.Add(md1)
+
+	//first modal button
+	md1.SubElems[0].Callback(func(string) {
+		Println(true)
+	})
+
+	//second modal button
+	md1.SubElems[1].Callback(func(string) {
+		Println(false)
+	})
+
 	ta1 := gc.GWB5TextArea("ta1", 12)
 	//mandatory: callback on textarea
 	ta1.Callback(func(string) {})
 
 	it4.Callback(func(value string) {
+		gc.GWB5ModalShow(md1)
 		text := Sprintf("From Input field: %s\n", value)
-		ta1.WriteTextArea(text)
+		gc.GWWriteTextArea(ta1, text)
 	})
 
 	dd5.Callback(func(value string) {
@@ -140,7 +154,7 @@ func main() {
 		for {
 			ind++
 			text := Sprintf("%d: All work and no play ...\n", ind)
-			ta1.WriteTextArea(text)
+			gc.GWWriteTextArea(ta1, text)
 			timeD := time.Duration(3000) * time.Millisecond
 			time.Sleep(timeD)
 		}

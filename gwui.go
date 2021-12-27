@@ -5,6 +5,7 @@ import (
 	. "fmt"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -35,6 +36,7 @@ const (
 	ParagraphT = 9
 	DDownT     = 10
 	CardT      = 11
+	ModalT     = 12
 )
 
 type Elem struct {
@@ -50,14 +52,17 @@ type Elem struct {
 	subEnd   string
 }
 type GuiCfg struct {
-	fh   fp.File
-	fjs  fp.File
-	fcss fp.File
-	Body *Elem
-	Port int
+	fh    fp.File
+	fjs   fp.File
+	fcss  fp.File
+	mutex sync.Mutex
+	Body  *Elem
+	Port  int
 }
 
-func (e *Elem) WriteTextArea(text string) {
+func (gc *GuiCfg) GWWriteTextArea(e Elem, text string) {
+	gc.mutex.Lock()
+	defer gc.mutex.Unlock()
 	if e.elType == TextAreaT && e.gs != nil {
 		err := e.gs.WriteMessage(websocket.TextMessage, []byte(text))
 		if err != nil {
@@ -214,7 +219,6 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
 
     <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet" media="screen">
     <link href="/static/web2.css" rel="stylesheet">
-    <script type="text/javascript" src="https://code.jquery.com/jquery.js"></script>
     <script type="text/javascript" src="/static/bootstrap/js/bootstrap.bundle.js"></script>
 
 	</head>
@@ -259,8 +263,10 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
 			var font = messages[2];
 			item.style.fontFamily  = font;
 		}
-
-		
+		if (type === "MODALSHOW") {
+			var modal = new bootstrap.Modal(item); 
+			modal.show();
+		}		
 	};
 	`, addr, e.id, e.id)
 
@@ -268,7 +274,20 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
 	//gc.fh.Write([]byte(body))
 }
 
+func (gc *GuiCfg) GWB5ModalShow(el Elem) {
+	gc.mutex.Lock()
+	defer gc.mutex.Unlock()
+	if gc.Body.gs != nil {
+		toSend := Sprintf("MODALSHOW@%s@%s", el.id, "dummy")
+		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
+	} else {
+		Println("Failed Modal Show, Set", gc.Body.id, "Callback!")
+	}
+}
+
 func (gc *GuiCfg) GWChangeText(el Elem, text string) {
+	gc.mutex.Lock()
+	defer gc.mutex.Unlock()
 	if gc.Body.gs != nil {
 		toSend := Sprintf("TEXT@%s@%s", el.id, text)
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
@@ -278,6 +297,8 @@ func (gc *GuiCfg) GWChangeText(el Elem, text string) {
 }
 
 func (gc *GuiCfg) GWChangeFontFamily(el Elem, text string) {
+	gc.mutex.Lock()
+	defer gc.mutex.Unlock()
 	if gc.Body.gs != nil {
 		toSend := Sprintf("FONTFAMILY@%s@%s", el.id, text)
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
@@ -287,6 +308,8 @@ func (gc *GuiCfg) GWChangeFontFamily(el Elem, text string) {
 }
 
 func (gc *GuiCfg) GWChangeColor(el Elem, text string) {
+	gc.mutex.Lock()
+	defer gc.mutex.Unlock()
 	if gc.Body.gs != nil {
 		toSend := Sprintf("COLOR@%s@%s", el.id, text)
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
@@ -336,6 +359,8 @@ func (gc *GuiCfg) GWSetFontFamily(el *Elem, text string) {
 }
 
 func (gc *GuiCfg) GWChangeBackgroundColor(el Elem, text string) {
+	gc.mutex.Lock()
+	defer gc.mutex.Unlock()
 	if gc.Body.gs != nil {
 		toSend := Sprintf("BCOLOR@%s@%s", el.id, text)
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
@@ -344,6 +369,8 @@ func (gc *GuiCfg) GWChangeBackgroundColor(el Elem, text string) {
 	}
 }
 func (gc *GuiCfg) GWChangeFontSize(el Elem, text string) {
+	gc.mutex.Lock()
+	defer gc.mutex.Unlock()
 	if gc.Body.gs != nil {
 		toSend := Sprintf("FONTSIZE@%s@%s", el.id, text)
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
@@ -406,6 +433,48 @@ func (gc *GuiCfg) GWParagraph(id string) Elem {
 	hEnd := `
 	</p>`
 	e := Elem{hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: ParagraphT, js: ""}
+	return e
+}
+
+func (gc *GuiCfg) GWB5Modal(id1 string, id2 string,
+	title string, text string, bt1Text string, bt2Text string) Elem {
+	hStart := Sprintf(`
+	<div class="modal" tabindex="-1" id="%s%s">
+	<div class="modal-dialog">
+	  <div class="modal-content">
+		<div class="modal-header">
+		  <h5 class="modal-title">%s</h5>
+		</div>
+		<div class="modal-body">
+		  <p>%s</p>
+		</div>
+		<div class="modal-footer">
+		  <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="%s_func()">%s</button>
+		  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="%s_func()">%s</button>
+		</div>
+	  </div>
+	</div>
+	</div>`, id1, id2, title, text, id1, bt1Text, id2, bt2Text)
+
+	e := Elem{hStart: hStart, hEnd: "", html: hStart, id: id1 + id2, elType: ModalT, js: ""}
+	e1 := Elem{id: id1, elType: ButtonT}
+	e2 := Elem{id: id2, elType: ButtonT}
+	e.SubElems = []Elem{e1, e2}
+	addr1 := Sprintf("/%s", id1)
+	addr2 := Sprintf("/%s", id2)
+	e.js = Sprintf(`
+	function %s_func() {
+		xhr = new XMLHttpRequest();
+		xhr.open("POST", "%s", true);
+		xhr.send();
+	}
+	function %s_func() {
+		xhr = new XMLHttpRequest();
+		xhr.open("POST", "%s", true);
+		xhr.send();
+	}
+	`, id1, addr1, id2, addr2)
+
 	return e
 }
 
