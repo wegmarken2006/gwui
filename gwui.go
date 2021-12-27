@@ -43,7 +43,6 @@ type Elem struct {
 	hEnd     string
 	html     string
 	js       string
-	css      string
 	id       string
 	gs       *websocket.Conn
 	SubElems []Elem
@@ -73,13 +72,11 @@ func (e *Elem) WriteTextArea(text string) {
 func (e *Elem) Add(n Elem) {
 	e.html = e.html + n.html + n.hEnd
 	e.js = e.js + n.js
-	e.css = e.css + n.css
 
 	e.html = e.html + n.subStart
 	for _, se := range n.SubElems {
 		e.html = e.html + se.html + se.hEnd
 		e.js = e.js + se.js
-		e.css = e.css + se.css
 	}
 	e.html = e.html + n.subEnd
 }
@@ -165,11 +162,9 @@ func (gc *GuiCfg) GWClose(body Elem) {
 	gc.fh.Write([]byte(body.html))
 	gc.fh.Write([]byte(body.hEnd))
 	gc.fjs.Write([]byte(body.js))
-	gc.fcss.Write([]byte(body.css))
 
 	gc.fh.Close()
 	gc.fjs.Close()
-	gc.fcss.Close()
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	http.Handle("/", http.FileServer(http.Dir("./static")))
@@ -201,7 +196,13 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
 	}
 	gc.fh = fp.Create("static/index.html")
 	gc.fjs = fp.Create("static/web2.js")
-	gc.fcss = fp.Create("static/web2.css")
+	_, errCss := os.Stat("static/web2.css")
+	if errCss != nil {
+		if os.IsNotExist(errCss) {
+			gc.fcss = fp.Create("static/web2.css")
+			gc.fcss.Close()
+		}
+	}
 
 	hStart := Sprintf(`
 	<!DOCTYPE html>
