@@ -14,6 +14,7 @@ func main() {
 	//mandatory: callback on body
 	body.Callback(func(string) {})
 	gc.Body = &body
+	gc.GWSetBackgroundColor(&body, "#ccffcc")
 
 	bt1 := gc.GWB5Button("btn-primary", "bt1", "Change")
 	lb1 := gc.GWB5Label("lb1", "Change text color")
@@ -114,10 +115,15 @@ func main() {
 	r1.Add(c1)
 	r1.Add(c2)
 
+	cd1 := gc.GWB5Card("cd1", "Kitchen Sink", "Elements")
+	gc.GWSetBackgroundColor(&cd1, "#eeffee")
+	gc.GWSetColor(&cd1, "green")
+	cd1.Add(r1)
+
 	tabs := gc.GWB5Tabs([]string{"tb1", "tb2"}, []string{"tab1", "tab2"})
 
 	//Fisrt tab content
-	tabs.SubElems[0].Add(r1)
+	tabs.SubElems[0].Add(cd1)
 
 	//Second tab content
 	tabs.SubElems[1].Add(lb10)

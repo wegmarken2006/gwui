@@ -34,6 +34,7 @@ const (
 	TPaneT     = 8
 	ParagraphT = 9
 	DDownT     = 10
+	CardT      = 11
 )
 
 type Elem struct {
@@ -294,10 +295,18 @@ func (gc *GuiCfg) GWChangeColor(el Elem, text string) {
 }
 
 func (gc *GuiCfg) GWSetBackgroundColor(el *Elem, text string) {
-	js := Sprintf(`
-	var item = document.getElementById("%s");
-	item.style.backgroundColor = "%s";		
-	`, el.id, text)
+	var js string
+	if el.elType == BodyT {
+		js = Sprintf(`
+		document.body.style.backgroundColor = "%s";		
+		`, text)
+	} else {
+		js = Sprintf(`
+		var item = document.getElementById("%s");
+		item.style.backgroundColor = "%s";		
+		`, el.id, text)
+	}
+
 	el.js = el.js + js
 }
 
@@ -398,6 +407,20 @@ func (gc *GuiCfg) GWParagraph(id string) Elem {
 	e := Elem{hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: ParagraphT, js: ""}
 	return e
 }
+
+func (gc *GuiCfg) GWB5Card(id string, header string, title string) Elem {
+	hStart := Sprintf(`
+	<div class="card">
+	<h5 class="card-header">%s</h5>
+	<div class="card-body" id="%s">
+	<h5 class="card-title">%s</h5>`, header, id, title)
+	hEnd := `
+	</div>
+	</div>`
+	e := Elem{hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: CardT, js: ""}
+	return e
+}
+
 func (gc *GuiCfg) GWB5Row(id string) Elem {
 	hStart := Sprintf(`
 	<div class="row" id="%s">`, id)
