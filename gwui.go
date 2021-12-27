@@ -40,6 +40,7 @@ type Elem struct {
 	hEnd     string
 	html     string
 	js       string
+	css      string
 	id       string
 	gs       *websocket.Conn
 	SubElems []Elem
@@ -51,6 +52,7 @@ type GuiCfg struct {
 	fjs  fp.File
 	fcss fp.File
 	Body *Elem
+	Port int
 }
 
 func (e *Elem) WriteTextArea(text string) {
@@ -68,10 +70,13 @@ func (e *Elem) WriteTextArea(text string) {
 func (e *Elem) Add(n Elem) {
 	e.html = e.html + n.html + n.hEnd
 	e.js = e.js + n.js
+	e.css = e.css + n.css
+
 	e.html = e.html + n.subStart
 	for _, se := range n.SubElems {
 		e.html = e.html + se.html + se.hEnd
 		e.js = e.js + se.js
+		e.css = e.css + se.css
 	}
 	e.html = e.html + n.subEnd
 }
@@ -107,18 +112,17 @@ func (e *Elem) Callback(fn func(string)) {
 
 func (gc *GuiCfg) GWRun() {
 	const TRIES int = 5
-	port := STARTING_PORT
 	var serveURL string
 	go func() {
 		for ind := 0; ind < TRIES; ind++ {
-			portStr := Sprintf(":%d", port)
-			serveURL = Sprintf("http://localhost:%d", port)
+			portStr := Sprintf(":%d", gc.Port)
+			serveURL = Sprintf("http://localhost:%d", gc.Port)
 			text := Sprintf("Serving on %s", serveURL)
 			Println(text)
 			err := http.ListenAndServe(portStr, nil)
 			if err != nil {
 				Println("Port busy, try another")
-				port += 1
+				gc.Port += 1
 			} else {
 				return
 			}
@@ -158,6 +162,7 @@ func (gc *GuiCfg) GWClose(body Elem) {
 	gc.fh.Write([]byte(body.html))
 	gc.fh.Write([]byte(body.hEnd))
 	gc.fjs.Write([]byte(body.js))
+	gc.fcss.Write([]byte(body.css))
 
 	gc.fh.Close()
 	gc.fjs.Close()
@@ -227,6 +232,10 @@ func (gc *GuiCfg) GWInit(title string) Elem {
 			var color = messages[2];
 			item.style.backgroundColor  = color;
 		}
+		if (type === "FONTSIZE") {
+			var fsize = messages[2];
+			item.style.fontSize  = fsize;
+		}
 
 		
 	};
@@ -250,27 +259,49 @@ func (gc *GuiCfg) GWChangeColor(el Elem, text string) {
 		toSend := Sprintf("COLOR@%s@%s", el.id, text)
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
-		Println("No Change Color, Set", gc.Body.id, "Callback!")
+		Println("Failed Change Color, Set", gc.Body.id, "Callback!")
 	}
 }
 
-func (gc *GuiCfg) GWSetBackgroundColor(el Elem, text string) {
+func (gc *GuiCfg) GWSetBackgroundColor(el *Elem, text string) {
 	js := Sprintf(`
-	var item = document.getElementById(%s);
-	item.style.color = %s;		
+	var item = document.getElementById("%s");
+	item.style.backgroundColor = "%s";		
 	`, el.id, text)
 	el.js = el.js + js
 }
 
+func (gc *GuiCfg) GWSetColor(el *Elem, text string) {
+	js := Sprintf(`
+	var item = document.getElementById("%s");
+	item.style.color = "%s";		
+	`, el.id, text)
+	el.js = el.js + js
+}
+
+func (gc *GuiCfg) GWSetFontSize(el *Elem, text string) {
+	js := Sprintf(`
+	var item = document.getElementById("%s");
+	item.style.fontSize = "%s";		
+	`, el.id, text)
+	el.js = el.js + js
+}
 func (gc *GuiCfg) GWChangeBackgroundColor(el Elem, text string) {
 	if gc.Body.gs != nil {
 		toSend := Sprintf("BCOLOR@%s@%s", el.id, text)
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
-		Println("No Change Back Color, Set", gc.Body.id, "Callback!")
+		Println("Failed Change Background Color, Set", gc.Body.id, "Callback!")
 	}
 }
-
+func (gc *GuiCfg) GWChangeFontSize(el Elem, text string) {
+	if gc.Body.gs != nil {
+		toSend := Sprintf("FONTSIZE@%s@%s", el.id, text)
+		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
+	} else {
+		Println("Failed Change Font Size, Set", gc.Body.id, "Callback!")
+	}
+}
 func (gc *GuiCfg) GWTabs(ids []string, texts []string) Elem {
 	var elems []Elem
 	hText := `
