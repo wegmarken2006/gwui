@@ -1,5 +1,6 @@
 # gwui
-## UI library based on Bootstrap 5.1.3
+## UI library based on Bootstrap 5.1.3.
+## Still  under development.
 ## App folder structure:
 ```
 |-myapp
