@@ -4,8 +4,10 @@ import (
 	. "fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/pkg/browser"
 	fp "github.com/wegmarken2006/filepanic"
 )
 
@@ -104,23 +106,51 @@ func (e *Elem) Callback(fn func(string)) {
 }
 
 func (gc *GuiCfg) GWRun() {
-
+	const TRIES int = 5
 	port := STARTING_PORT
+	var serveURL string
 	go func() {
-		for {
+		for ind := 0; ind < TRIES; ind++ {
 			portStr := Sprintf(":%d", port)
-			text := Sprintf("Serving on http://localhost%s", portStr)
+			serveURL = Sprintf("http://localhost:%d", port)
+			text := Sprintf("Serving on %s", serveURL)
 			Println(text)
 			err := http.ListenAndServe(portStr, nil)
 			if err != nil {
-				Println(err)
+				Println("Port busy, try another")
 				port += 1
 			} else {
-
-				break
+				return
 			}
 		}
+		Println("Something went wrong with the server")
 	}()
+
+	go func() {
+		ind := 0
+		for {
+			if serveURL == "" {
+				timeD := time.Duration(500) * time.Millisecond
+				time.Sleep(timeD)
+				continue
+			}
+			if ind >= TRIES {
+				break
+			}
+			errb := browser.OpenURL(serveURL)
+			if errb != nil {
+				Println("Wrong URL")
+			} else {
+				text := Sprintf("Launching browser with %s ...", serveURL)
+				Println(text)
+				Println(" You may need to disable adblocker on localhost")
+				return
+			}
+			ind++
+		}
+		Println("Something went wrong with the browser")
+	}()
+
 }
 
 func (gc *GuiCfg) GWClose(body Elem) {
@@ -128,6 +158,10 @@ func (gc *GuiCfg) GWClose(body Elem) {
 	gc.fh.Write([]byte(body.html))
 	gc.fh.Write([]byte(body.hEnd))
 	gc.fjs.Write([]byte(body.js))
+
+	gc.fh.Close()
+	gc.fjs.Close()
+	gc.fcss.Close()
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	http.Handle("/", http.FileServer(http.Dir("./static")))
