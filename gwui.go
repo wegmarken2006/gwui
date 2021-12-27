@@ -174,7 +174,7 @@ func (gc *GuiCfg) GWClose(body Elem) {
 
 }
 
-func (gc *GuiCfg) GWInit(title string) Elem {
+func (gc *GuiCfg) GWB5Init(title string) Elem {
 
 	if _, err := os.Stat("./static"); os.IsNotExist(err) {
 		Println("Folder ./static missing.")
@@ -302,7 +302,7 @@ func (gc *GuiCfg) GWChangeFontSize(el Elem, text string) {
 		Println("Failed Change Font Size, Set", gc.Body.id, "Callback!")
 	}
 }
-func (gc *GuiCfg) GWTabs(ids []string, texts []string) Elem {
+func (gc *GuiCfg) GWB5Tabs(ids []string, texts []string) Elem {
 	var elems []Elem
 	hText := `
 	<ul class="nav nav-tabs">
@@ -358,7 +358,7 @@ func (gc *GuiCfg) GWParagraph(id string) Elem {
 	e := Elem{hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: ParagraphT, js: ""}
 	return e
 }
-func (gc *GuiCfg) GWRow(id string) Elem {
+func (gc *GuiCfg) GWB5Row(id string) Elem {
 	hStart := Sprintf(`
 	<div class="row" id="%s">`, id)
 	hEnd := `
@@ -367,7 +367,7 @@ func (gc *GuiCfg) GWRow(id string) Elem {
 	return e
 }
 
-func (gc *GuiCfg) GWCol(id string) Elem {
+func (gc *GuiCfg) GWB5Col(id string) Elem {
 	hStart := Sprintf(`
 	<div class="col" id="%s">`, id)
 	hEnd := `
@@ -376,7 +376,7 @@ func (gc *GuiCfg) GWCol(id string) Elem {
 	return e
 }
 
-func (gc *GuiCfg) GWButton(bType string, id string, text string) Elem {
+func (gc *GuiCfg) GWB5Button(bType string, id string, text string) Elem {
 	hText := Sprintf(`
 	<button type="button" class="btn %s m-2" id="%s" onclick="%s_func()">%s</button>`, bType, id, id, text)
 	//gc.fh.Write([]byte(hText))
@@ -394,7 +394,7 @@ func (gc *GuiCfg) GWButton(bType string, id string, text string) Elem {
 	return e
 }
 
-func (gc *GuiCfg) GWInputText(id string) Elem {
+func (gc *GuiCfg) GWB5InputText(id string) Elem {
 	hStart := Sprintf(`
 	<input type="text" class="m-2" id="%s" name="%s" onkeypress="%s_func(event)">
 	`, id, id, id)
@@ -414,7 +414,7 @@ func (gc *GuiCfg) GWInputText(id string) Elem {
 	return e
 }
 
-func (gc *GuiCfg) GWLabel(id string, text string) Elem {
+func (gc *GuiCfg) GWB5Label(id string, text string) Elem {
 	hText := Sprintf(`
 	<label class="m-2" id=%s>%s</label>`, id, text)
 	//gc.fh.Write([]byte(hText))
@@ -422,7 +422,7 @@ func (gc *GuiCfg) GWLabel(id string, text string) Elem {
 	return e
 }
 
-func (gc *GuiCfg) GWTextArea(id string, rows int) Elem {
+func (gc *GuiCfg) GWB5TextArea(id string, rows int) Elem {
 	hText := Sprintf(`
 	<div class="form-group mx-2" style="min-width: 90%c">
 	<p><textarea class="form-control" id=%s rows="%d"></textarea></p>
