@@ -2,3 +2,7 @@ examples/ksink/ksink.exe
 examples/ksink/go.sum
 examples/ksink/static/index.html
 examples/ksink/static/web2.js
+examples/minimal/mini.exe
+examples/minimal/go.sum
+examples/minimal/static/index.html
+examples/minimal/static/web2.js
