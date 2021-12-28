@@ -1,6 +1,12 @@
 # gwui
 ## UI library based on Bootstrap 5.1.3.
+### UI is served on localhost, then the default browser is launched.
+### HTTP POST used for UI -> logic messages.
+### Websockets used for logic -> UI messages. 
+### Intented for simple personal utility tools, don't use for security critical applications as it doesn't use HTTPS.
+
 ### Still  under development.
+###
 ### App folder structure:
 ```
 |-myapp
