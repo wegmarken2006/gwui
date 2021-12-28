@@ -82,6 +82,7 @@ func main() {
 	bt1.Callback(func(string) {
 		gc.GWChangeColor(ta1, "red")
 		gc.GWChangeText(bt1, "Changed")
+		gc.GWChangeToDisable(bt1)
 	})
 
 	bt2.Callback(func(string) {

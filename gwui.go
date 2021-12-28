@@ -168,6 +168,7 @@ func (gc *GuiCfg) GWRun() {
 	}
 }
 
+//Writes and closes html and js files
 func (gc *GuiCfg) GWClose(body Elem) {
 
 	gc.fh.Write([]byte(body.html))
@@ -198,6 +199,7 @@ func (gc *GuiCfg) GWWaitKeyFromCOnsole() {
 	}
 }
 
+//Creates html and js files, returns the Body element
 func (gc *GuiCfg) GWB5Init(title string) Elem {
 
 	if _, err := os.Stat("./static"); os.IsNotExist(err) {
@@ -253,25 +255,34 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
 		if (type === "TEXT") {
 			item.innerHTML = messages[2];
 		}
-		if (type === "COLOR") {
+		else if (type === "COLOR") {
 			var color = messages[2];
 			item.style.color = color;
 		}
-		if (type === "BCOLOR") {
+		else if (type === "BCOLOR") {
 			var color = messages[2];
 			item.style.backgroundColor  = color;
 		}
-		if (type === "FONTSIZE") {
+		else if (type === "FONTSIZE") {
 			var fsize = messages[2];
 			item.style.fontSize  = fsize;
 		}
-		if (type === "FONTFAMILY") {
+		else if (type === "FONTFAMILY") {
 			var font = messages[2];
 			item.style.fontFamily  = font;
 		}
-		if (type === "MODALSHOW") {
+		else if (type === "MODALSHOW") {
 			var modal = new bootstrap.Modal(item); 
 			modal.show();
+		}
+		else if (type === "ENABLE") {
+			var enable = messages[2];
+			if (enable === "ENABLE") {
+				item.disabled = false;
+			}
+			else  {
+				item.disabled = true;
+			}
 		}		
 	};
 	`, addr, e.id, e.id)
@@ -290,6 +301,31 @@ func (gc *GuiCfg) GWB5ModalShow(el Elem) {
 	}
 }
 
+//Dynamically change element status to disable
+func (gc *GuiCfg) GWChangeToDisable(el Elem) {
+	gc.mutex.Lock()
+	defer gc.mutex.Unlock()
+	if gc.Body.gs != nil {
+		toSend := Sprintf("ENABLE@%s@%s", el.id, "DISABLE")
+		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
+	} else {
+		Println("Failed Disable, Set", gc.Body.id, "Callback!")
+	}
+}
+
+//Dynamically change element status to enable
+func (gc *GuiCfg) GWChangeToEnable(el Elem) {
+	gc.mutex.Lock()
+	defer gc.mutex.Unlock()
+	if gc.Body.gs != nil {
+		toSend := Sprintf("ENABLE@%s@%s", el.id, "ENABLE")
+		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
+	} else {
+		Println("Failed Disable, Set", gc.Body.id, "Callback!")
+	}
+}
+
+//Dynamically change element text
 func (gc *GuiCfg) GWChangeText(el Elem, text string) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -301,6 +337,7 @@ func (gc *GuiCfg) GWChangeText(el Elem, text string) {
 	}
 }
 
+//Dynamically change element font family
 func (gc *GuiCfg) GWChangeFontFamily(el Elem, text string) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -312,6 +349,7 @@ func (gc *GuiCfg) GWChangeFontFamily(el Elem, text string) {
 	}
 }
 
+//Dynamically change element color
 func (gc *GuiCfg) GWChangeColor(el Elem, text string) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -323,6 +361,7 @@ func (gc *GuiCfg) GWChangeColor(el Elem, text string) {
 	}
 }
 
+//Set initial element background color
 func (gc *GuiCfg) GWSetBackgroundColor(el *Elem, text string) {
 	var js string
 	if el.elType == BodyT {
@@ -339,6 +378,25 @@ func (gc *GuiCfg) GWSetBackgroundColor(el *Elem, text string) {
 	el.js = el.js + js
 }
 
+//Set inital element status to disable
+func (gc *GuiCfg) GWSetToDisable(el *Elem) {
+	js := Sprintf(`
+	var item = document.getElementById("%s");
+	item.disabled = true;		
+	`, el.id)
+	el.js = el.js + js
+}
+
+//Set inital element status to enable
+func (gc *GuiCfg) GWSetToEnable(el *Elem) {
+	js := Sprintf(`
+	var item = document.getElementById("%s");
+	item.disabled = false;		
+	`, el.id)
+	el.js = el.js + js
+}
+
+//Set inital element color
 func (gc *GuiCfg) GWSetColor(el *Elem, text string) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
@@ -347,6 +405,7 @@ func (gc *GuiCfg) GWSetColor(el *Elem, text string) {
 	el.js = el.js + js
 }
 
+//Set inital element font size
 func (gc *GuiCfg) GWSetFontSize(el *Elem, text string) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
@@ -355,6 +414,7 @@ func (gc *GuiCfg) GWSetFontSize(el *Elem, text string) {
 	el.js = el.js + js
 }
 
+//Set inital element font family
 func (gc *GuiCfg) GWSetFontFamily(el *Elem, text string) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
@@ -363,6 +423,7 @@ func (gc *GuiCfg) GWSetFontFamily(el *Elem, text string) {
 	el.js = el.js + js
 }
 
+//Dynamically change element background color
 func (gc *GuiCfg) GWChangeBackgroundColor(el Elem, text string) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -373,6 +434,8 @@ func (gc *GuiCfg) GWChangeBackgroundColor(el Elem, text string) {
 		Println("Failed Background Color change, Set", gc.Body.id, "Callback!")
 	}
 }
+
+//Dynamically change element font size
 func (gc *GuiCfg) GWChangeFontSize(el Elem, text string) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -384,6 +447,7 @@ func (gc *GuiCfg) GWChangeFontSize(el Elem, text string) {
 	}
 }
 
+//Create nav-tabs; pass vector of unique ids; contained tabs are returned as SubElems
 func (gc *GuiCfg) GWB5Tabs(ids []string, texts []string) Elem {
 	var elems []Elem
 	hText := `
