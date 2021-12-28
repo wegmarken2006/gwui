@@ -88,7 +88,7 @@ func (e *Elem) Add(n Elem) {
 	e.html = e.html + n.subEnd
 }
 
-//Event handler to be attached to elements; runs in its thread
+// Event handler to be attached to elements; runs in its ownthread
 func (e *Elem) Callback(fn func(string)) {
 	go func() {
 		addr := Sprintf("/%s", e.id)
@@ -120,6 +120,7 @@ func (e *Elem) Callback(fn func(string)) {
 	}()
 }
 
+// Start the server anf launch the browser
 func (gc *GuiCfg) GWRun() {
 	const TRIES int = 5
 	var serveURL string
@@ -168,7 +169,7 @@ func (gc *GuiCfg) GWRun() {
 	}
 }
 
-//Writes and closes html and js files
+// Write and close  html and js files
 func (gc *GuiCfg) GWClose(body Elem) {
 
 	gc.fh.Write([]byte(body.html))
@@ -199,7 +200,7 @@ func (gc *GuiCfg) GWWaitKeyFromCOnsole() {
 	}
 }
 
-//Creates html and js files, returns the Body element
+// Create html and js files, return the Body element
 func (gc *GuiCfg) GWB5Init(title string) Elem {
 
 	if _, err := os.Stat("./static"); os.IsNotExist(err) {
@@ -301,7 +302,7 @@ func (gc *GuiCfg) GWB5ModalShow(el Elem) {
 	}
 }
 
-//Dynamically change element status to disable
+// Dynamically change element status to disable
 func (gc *GuiCfg) GWChangeToDisable(el Elem) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -313,7 +314,7 @@ func (gc *GuiCfg) GWChangeToDisable(el Elem) {
 	}
 }
 
-//Dynamically change element status to enable
+// Dynamically change element status to enable
 func (gc *GuiCfg) GWChangeToEnable(el Elem) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -325,7 +326,7 @@ func (gc *GuiCfg) GWChangeToEnable(el Elem) {
 	}
 }
 
-//Dynamically change element text
+// Dynamically change element text
 func (gc *GuiCfg) GWChangeText(el Elem, text string) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -337,7 +338,7 @@ func (gc *GuiCfg) GWChangeText(el Elem, text string) {
 	}
 }
 
-//Dynamically change element font family
+// Dynamically change element font family
 func (gc *GuiCfg) GWChangeFontFamily(el Elem, text string) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -349,7 +350,7 @@ func (gc *GuiCfg) GWChangeFontFamily(el Elem, text string) {
 	}
 }
 
-//Dynamically change element color
+// Dynamically change element color
 func (gc *GuiCfg) GWChangeColor(el Elem, text string) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -361,7 +362,7 @@ func (gc *GuiCfg) GWChangeColor(el Elem, text string) {
 	}
 }
 
-//Set initial element background color
+// Set initial element background color
 func (gc *GuiCfg) GWSetBackgroundColor(el *Elem, text string) {
 	var js string
 	if el.elType == BodyT {
@@ -378,7 +379,7 @@ func (gc *GuiCfg) GWSetBackgroundColor(el *Elem, text string) {
 	el.js = el.js + js
 }
 
-//Set inital element status to disable
+// Set initial element status to disable
 func (gc *GuiCfg) GWSetToDisable(el *Elem) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
@@ -387,7 +388,7 @@ func (gc *GuiCfg) GWSetToDisable(el *Elem) {
 	el.js = el.js + js
 }
 
-//Set inital element status to enable
+// Set initial element status to enable
 func (gc *GuiCfg) GWSetToEnable(el *Elem) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
@@ -396,7 +397,7 @@ func (gc *GuiCfg) GWSetToEnable(el *Elem) {
 	el.js = el.js + js
 }
 
-//Set inital element color
+// Set initial element color
 func (gc *GuiCfg) GWSetColor(el *Elem, text string) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
@@ -405,7 +406,7 @@ func (gc *GuiCfg) GWSetColor(el *Elem, text string) {
 	el.js = el.js + js
 }
 
-//Set inital element font size
+// Set initial element font size
 func (gc *GuiCfg) GWSetFontSize(el *Elem, text string) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
@@ -414,7 +415,7 @@ func (gc *GuiCfg) GWSetFontSize(el *Elem, text string) {
 	el.js = el.js + js
 }
 
-//Set inital element font family
+// Set initial element font family
 func (gc *GuiCfg) GWSetFontFamily(el *Elem, text string) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
@@ -423,7 +424,7 @@ func (gc *GuiCfg) GWSetFontFamily(el *Elem, text string) {
 	el.js = el.js + js
 }
 
-//Dynamically change element background color
+// Dynamically change element background color
 func (gc *GuiCfg) GWChangeBackgroundColor(el Elem, text string) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -435,7 +436,7 @@ func (gc *GuiCfg) GWChangeBackgroundColor(el Elem, text string) {
 	}
 }
 
-//Dynamically change element font size
+// Dynamically change element font size
 func (gc *GuiCfg) GWChangeFontSize(el Elem, text string) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -447,7 +448,8 @@ func (gc *GuiCfg) GWChangeFontSize(el Elem, text string) {
 	}
 }
 
-//Create nav-tabs; pass vector of unique ids; contained tabs are returned as SubElems
+// Create nav-tabs; pass a vector of unique ids;
+// pass a vector of tab texts; contained tabs are returned as SubElems
 func (gc *GuiCfg) GWB5Tabs(ids []string, texts []string) Elem {
 	var elems []Elem
 	hText := `
@@ -496,6 +498,7 @@ func (gc *GuiCfg) GWB5Tabs(ids []string, texts []string) Elem {
 	return tabs
 }
 
+// Create paragraph; pass a unique identifier
 func (gc *GuiCfg) GWParagraph(id string) Elem {
 	hStart := Sprintf(`
 	<p id="%s">`, id)
@@ -505,6 +508,8 @@ func (gc *GuiCfg) GWParagraph(id string) Elem {
 	return e
 }
 
+// Modal Dialog; pass 2 unique identifier for the buttons
+// title and general text, button texts
 func (gc *GuiCfg) GWB5Modal(id1 string, id2 string,
 	title string, text string, bt1Text string, bt2Text string) Elem {
 	hStart := Sprintf(`
@@ -549,6 +554,7 @@ func (gc *GuiCfg) GWB5Modal(id1 string, id2 string,
 	return e
 }
 
+// Create a card; pass a unique identifier, header and title text
 func (gc *GuiCfg) GWB5Card(id string, header string, title string) Elem {
 	hStart := Sprintf(`
 	<div class="card">
@@ -562,6 +568,7 @@ func (gc *GuiCfg) GWB5Card(id string, header string, title string) Elem {
 	return e
 }
 
+// Create a row, pass a unique identifier
 func (gc *GuiCfg) GWB5Row(id string) Elem {
 	hStart := Sprintf(`
 	<div class="row" id="%s">`, id)
@@ -571,6 +578,7 @@ func (gc *GuiCfg) GWB5Row(id string) Elem {
 	return e
 }
 
+// Create a col, pass a unique identifier
 func (gc *GuiCfg) GWB5Col(id string) Elem {
 	hStart := Sprintf(`
 	<div class="col" id="%s">`, id)
@@ -611,6 +619,7 @@ func (gc *GuiCfg) GWB5DropDown(bType string, id string, text string, list []stri
 	return e
 }
 
+// Create a button, pass the B5 type, a unique identifier, the text
 func (gc *GuiCfg) GWB5Button(bType string, id string, text string) Elem {
 	hText := Sprintf(`
 	<button type="button" class="btn %s m-2" id="%s" onclick="%s_func()">%s</button>`, bType, id, id, text)
@@ -629,6 +638,7 @@ func (gc *GuiCfg) GWB5Button(bType string, id string, text string) Elem {
 	return e
 }
 
+// Create a input text field; pass a unique identifier
 func (gc *GuiCfg) GWB5InputText(id string) Elem {
 	hStart := Sprintf(`
 	<input type="text" class="m-2" id="%s" name="%s" onkeypress="%s_func(event)">
@@ -649,6 +659,7 @@ func (gc *GuiCfg) GWB5InputText(id string) Elem {
 	return e
 }
 
+// Create a label; pass a unique identifier and the text
 func (gc *GuiCfg) GWB5Label(id string, text string) Elem {
 	hText := Sprintf(`
 	<label class="m-2" id=%s>%s</label>`, id, text)
@@ -657,6 +668,7 @@ func (gc *GuiCfg) GWB5Label(id string, text string) Elem {
 	return e
 }
 
+// Create a textarea; pass a unique identifier and the number of rows
 func (gc *GuiCfg) GWB5TextArea(id string, rows int) Elem {
 	hText := Sprintf(`
 	<div class="form-group mx-2" style="min-width: 90%c">
