@@ -40,24 +40,26 @@ const (
 )
 
 type Elem struct {
-	elType   int
-	hStart   string
-	hEnd     string
-	html     string
-	js       string
-	id       string
-	gs       *websocket.Conn
-	SubElems []Elem
-	subStart string
-	subEnd   string
+	elType    int
+	hStart    string
+	hEnd      string
+	html      string
+	js        string
+	id        string
+	gs        *websocket.Conn
+	SubElems  []Elem
+	subStart  string
+	subEnd    string
+	ChanBool1 chan bool
 }
 type GuiCfg struct {
-	fh    fp.File
-	fjs   fp.File
-	fcss  fp.File
-	mutex sync.Mutex
-	Body  *Elem
-	Port  int
+	fh           fp.File
+	fjs          fp.File
+	fcss         fp.File
+	mutex        sync.Mutex
+	Body         *Elem
+	Port         int
+	BrowserStart bool
 }
 
 func (gc *GuiCfg) GWWriteTextArea(e Elem, text string) {
@@ -86,33 +88,36 @@ func (e *Elem) Add(n Elem) {
 	e.html = e.html + n.subEnd
 }
 
+//Event handler to be attached to elements; runs in its thread
 func (e *Elem) Callback(fn func(string)) {
-	addr := Sprintf("/%s", e.id)
-	if e.elType == ButtonT {
-		http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
-			fn("")
-		})
-	} else if e.elType == ITextT || e.elType == DDownT {
-		http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
-			buf := make([]byte, BUFFER_SIZE)
-			inp := r.Body
-			inp.Read(buf)
-			buf = buf[:r.ContentLength]
-			fn(string(buf))
-		})
+	go func() {
+		addr := Sprintf("/%s", e.id)
+		if e.elType == ButtonT {
+			http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
+				fn("")
+			})
+		} else if e.elType == ITextT || e.elType == DDownT {
+			http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
+				buf := make([]byte, BUFFER_SIZE)
+				inp := r.Body
+				inp.Read(buf)
+				buf = buf[:r.ContentLength]
+				fn(string(buf))
+			})
 
-	} else if e.elType == TextAreaT || e.elType == BodyT {
-		http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
-			upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-			var err error
-			e.gs, err = upgrader.Upgrade(w, r, nil)
-			if err != nil {
-				text := Sprintf("wsEndPoint %s, %s", e.id, err)
-				Println(text)
-			}
-			fn("")
-		})
-	}
+		} else if e.elType == TextAreaT || e.elType == BodyT {
+			http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
+				upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+				var err error
+				e.gs, err = upgrader.Upgrade(w, r, nil)
+				if err != nil {
+					text := Sprintf("wsEndPoint %s, %s", e.id, err)
+					Println(text)
+				}
+				fn("")
+			})
+		}
+	}()
 }
 
 func (gc *GuiCfg) GWRun() {
@@ -135,31 +140,32 @@ func (gc *GuiCfg) GWRun() {
 		Println("Something went wrong with the server")
 	}()
 
-	go func() {
-		ind := 0
-		for {
-			if serveURL == "" {
-				timeD := time.Duration(500) * time.Millisecond
-				time.Sleep(timeD)
-				continue
+	if gc.BrowserStart {
+		go func() {
+			ind := 0
+			for {
+				if serveURL == "" {
+					timeD := time.Duration(500) * time.Millisecond
+					time.Sleep(timeD)
+					continue
+				}
+				if ind >= TRIES {
+					break
+				}
+				errb := browser.OpenURL(serveURL)
+				if errb != nil {
+					Println("Wrong URL")
+				} else {
+					text := Sprintf("Launching browser with %s ...", serveURL)
+					Println(text)
+					Println(" You may need to disable adblocker on localhost")
+					return
+				}
+				ind++
 			}
-			if ind >= TRIES {
-				break
-			}
-			errb := browser.OpenURL(serveURL)
-			if errb != nil {
-				Println("Wrong URL")
-			} else {
-				text := Sprintf("Launching browser with %s ...", serveURL)
-				Println(text)
-				Println(" You may need to disable adblocker on localhost")
-				return
-			}
-			ind++
-		}
-		Println("Something went wrong with the browser")
-	}()
-
+			Println("Something went wrong with the browser")
+		}()
+	}
 }
 
 func (gc *GuiCfg) GWClose(body Elem) {
@@ -271,7 +277,6 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
 	`, addr, e.id, e.id)
 
 	return e
-	//gc.fh.Write([]byte(body))
 }
 
 func (gc *GuiCfg) GWB5ModalShow(el Elem) {
@@ -456,7 +461,9 @@ func (gc *GuiCfg) GWB5Modal(id1 string, id2 string,
 	</div>
 	</div>`, id1, id2, title, text, id1, bt1Text, id2, bt2Text)
 
-	e := Elem{hStart: hStart, hEnd: "", html: hStart, id: id1 + id2, elType: ModalT, js: ""}
+	ch := make(chan bool)
+	e := Elem{hStart: hStart, hEnd: "", html: hStart, id: id1 + id2,
+		elType: ModalT, js: "", ChanBool1: ch}
 	e1 := Elem{id: id1, elType: ButtonT}
 	e2 := Elem{id: id2, elType: ButtonT}
 	e.SubElems = []Elem{e1, e2}

@@ -9,7 +9,9 @@ import (
 
 func main() {
 
-	gc := gw.GuiCfg{Port: 9000}
+	//create elements
+
+	gc := gw.GuiCfg{Port: 9000, BrowserStart: true}
 	body := gc.GWB5Init("gwui test")
 	//mandatory: callback on body
 	body.Callback(func(string) {})
@@ -35,52 +37,66 @@ func main() {
 	lb10 := gc.GWB5Label("lb5", "Another tab")
 
 	md1 := gc.GWB5Modal("m1bt1", "m2bt2", "TEXT INPUT", "Are you sure", "yes", "no")
-	body.Add(md1)
-
-	//first modal button
-	md1.SubElems[0].Callback(func(string) {
-		Println(true)
-	})
-
-	//second modal button
-	md1.SubElems[1].Callback(func(string) {
-		Println(false)
-	})
 
 	ta1 := gc.GWB5TextArea("ta1", 12)
 	//mandatory: callback on textarea
 	ta1.Callback(func(string) {})
-
-	it4.Callback(func(value string) {
-		gc.GWB5ModalShow(md1)
-		text := Sprintf("From Input field: %s\n", value)
-		gc.GWWriteTextArea(ta1, text)
-	})
-
-	dd5.Callback(func(value string) {
-		gc.GWChangeFontFamily(ta1, value)
-	})
 
 	gc.GWSetBackgroundColor(&ta1, "#ffe6e6")
 	gc.GWSetColor(&ta1, "blue")
 	gc.GWSetFontSize(&ta1, "small")
 	gc.GWSetFontFamily(&ta1, "monospace")
 
+	cd1 := gc.GWB5Card("cd1", "Kitchen Sink", "Elements")
+	gc.GWSetBackgroundColor(&cd1, "#eeffee")
+	gc.GWSetColor(&cd1, "green")
+
+	tabs := gc.GWB5Tabs([]string{"tb1", "tb2"}, []string{"tab1", "tab2"})
+
+	// callbacks
+
+	//first modal button
+	md1.SubElems[0].Callback(func(string) {
+		md1.ChanBool1 <- true
+	})
+
+	//second modal button
+	md1.SubElems[1].Callback(func(string) {
+		md1.ChanBool1 <- false
+	})
+
+	it4.Callback(func(value string) {
+		gc.GWB5ModalShow(md1)
+		yes := <-md1.ChanBool1
+		if yes {
+			text := Sprintf("From Input field: %s\n", value)
+			gc.GWWriteTextArea(ta1, text)
+		}
+
+	})
+
+	dd5.Callback(func(value string) {
+		gc.GWChangeFontFamily(ta1, value)
+	})
+
 	bt1.Callback(func(string) {
 		gc.GWChangeColor(ta1, "red")
 		gc.GWChangeText(bt1, "Changed")
 	})
+
 	bt2.Callback(func(string) {
 		gc.GWChangeBackgroundColor(ta1, "#66ffff")
 		gc.GWChangeText(bt2, "Changed")
 	})
+
 	bt3.Callback(func(string) {
 		gc.GWChangeFontSize(ta1, "large")
 		gc.GWChangeText(bt3, "Changed")
 	})
 
-	r1 := gc.GWB5Row("r1")
+	// place elements in a grid
 
+	r1 := gc.GWB5Row("r1")
 	r11 := gc.GWB5Row("r11")
 	r12 := gc.GWB5Row("r12")
 	r13 := gc.GWB5Row("r13")
@@ -129,24 +145,22 @@ func main() {
 	r1.Add(c1)
 	r1.Add(c2)
 
-	cd1 := gc.GWB5Card("cd1", "Kitchen Sink", "Elements")
-	gc.GWSetBackgroundColor(&cd1, "#eeffee")
-	gc.GWSetColor(&cd1, "green")
 	cd1.Add(r1)
-
-	tabs := gc.GWB5Tabs([]string{"tb1", "tb2"}, []string{"tab1", "tab2"})
 
 	//Fisrt tab content
 	tabs.SubElems[0].Add(cd1)
 
 	//Second tab content
 	tabs.SubElems[1].Add(lb10)
+
+	//final body additions; add modal to body directly
 	body.Add(tabs)
+	body.Add(md1)
 
 	gc.GWClose(body)
 	gc.GWRun()
 
-	//Continuous write in textarea
+	//Processing simulation: continuous write in textarea
 	timeD := time.Duration(5000) * time.Millisecond
 	time.Sleep(timeD)
 	go func() {

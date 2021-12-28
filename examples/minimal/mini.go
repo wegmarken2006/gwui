@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	gc := gw.GuiCfg{Port: 9000}
+	gc := gw.GuiCfg{Port: 9000, BrowserStart: true}
 	body := gc.GWB5Init("mini")
 
 	//mandatory: callback on body

@@ -1,9 +1,9 @@
 # gwui
 ## UI library based on Bootstrap 5.1.3.
-### UI is served on localhost, then the default browser is launched.
+### UI is served on localhost, then the default browser can be automatically launched.
 ### HTTP POST used for UI -> logic messages.
 ### Websockets used for logic -> UI messages. 
-### Intented for simple personal utility tools, don't use for security critical applications as it doesn't use HTTPS.
+### Intended for simple personal utility tools, don't use for security critical applications as it doesn't use HTTPS.
 
 ### Still  under development.
 ###
@@ -37,7 +37,7 @@ import (
 )
 
 func main() {
-	gc := gw.GuiCfg{Port: 9000}
+	gc := gw.GuiCfg{Port: 9000, BrowserStart: true}
 	body := gc.GWB5Init("mini")
 
 	//mandatory: callback on body
