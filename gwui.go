@@ -37,6 +37,7 @@ const (
 	DDownT     = 10
 	CardT      = 11
 	ModalT     = 12
+	ImageT     = 13
 )
 
 type Elem struct {
@@ -544,6 +545,16 @@ func (gc *GuiCfg) GWParagraphNew(id string) Elem {
 	hEnd := `
 	</p>`
 	e := Elem{gc: gc, hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: ParagraphT, js: ""}
+	return e
+}
+
+// GWParagraphNew creates an image tag; pass a unique identifier,
+// the name of the image file, the size. The image file must reside in /static
+func (gc *GuiCfg) GWImageNew(id string, fileName string, width int, height int) Elem {
+	hStart := Sprintf(`
+	<img id="%s" src="static/%s" alt="missing img" width="%d" height="%d">
+	`, id, fileName, width, height)
+	e := Elem{gc: gc, hStart: hStart, hEnd: "", html: hStart, id: id, elType: ImageT, js: ""}
 	return e
 }
 

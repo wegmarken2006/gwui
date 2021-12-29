@@ -49,9 +49,13 @@ func main() {
 
 	cd1 := gc.GWB5CardNew("cd1", "Kitchen Sink", "Elements")
 	cd1.SetBackgroundColor("#eeffee")
-	cd1.SetColor("green")
 
-	tabs := gc.GWB5TabsNew([]string{"tb1", "tb2"}, []string{"tab1", "tab2"})
+	img1 := gc.GWImageNew("img1", "sunset.jpg", 50, 50)
+	img2 := gc.GWImageNew("img2", "sunset.jpg", 100, 100)
+	img3 := gc.GWImageNew("img3", "sunset.jpg", 200, 200)
+	img4 := gc.GWImageNew("img4", "sunset.jpg", 400, 400)
+
+	tabs := gc.GWB5TabsNew([]string{"tb1", "tb2", "tab3"}, []string{"tab1", "tab2", "tab3"})
 
 	// callbacks
 
@@ -152,7 +156,14 @@ func main() {
 	tabs.SubElems[0].Add(cd1)
 
 	//Second tab content
-	tabs.SubElems[1].Add(lb10)
+	tabs.SubElems[1].SetBackgroundColor("white")
+	tabs.SubElems[1].Add(img1)
+	tabs.SubElems[1].Add(img2)
+	tabs.SubElems[1].Add(img3)
+	tabs.SubElems[1].Add(img4)
+
+	//Third tab content
+	tabs.SubElems[2].Add(lb10)
 
 	//final body additions; add modal to body directly
 	body.Add(tabs)
