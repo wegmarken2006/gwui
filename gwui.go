@@ -38,6 +38,7 @@ const (
 	CardT      = 11
 	ModalT     = 12
 	ImageT     = 13
+	RSliderT   = 14
 )
 
 type Elem struct {
@@ -76,26 +77,35 @@ func (e *Elem) Add(n Elem) {
 	e.html = e.html + n.subEnd
 }
 
-// Event handler to be attached to an element; it runs in its own thread.
-func (e *Elem) Callback(fn func(string)) {
+// Event handler for elements; it runs in its own thread.
+// It takes a user function in input.
+// It passes a string or a int value to the user function, depending on what
+// is received from a POST
+func (e *Elem) Callback(fn func(string, int)) {
 	go func() {
 		addr := Sprintf("/%s", e.id)
 		if e.elType == ButtonT {
 			http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
-				fn("")
+				fn("", 0)
 			})
-		} else if e.elType == ITextT || e.elType == DDownT {
+		} else if e.elType == ITextT || e.elType == DDownT || e.elType == RSliderT {
 			http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
 				buf := make([]byte, BUFFER_SIZE)
 				inp := r.Body
 				inp.Read(buf)
-				value := string(buf[:r.ContentLength])
+				strValue := string(buf[:r.ContentLength])
 				if e.elType == DDownT {
 					//change button text with selected item
-					e.ChangeText(value)
+					e.ChangeText(strValue)
 
 				}
-				fn(value)
+				if e.elType == ITextT || e.elType == DDownT {
+					fn(strValue, 0)
+				} else if e.elType == RSliderT {
+					var intValue int
+					Sscanf(strValue, "%d", &intValue)
+					fn(strValue, intValue)
+				}
 			})
 
 		} else if e.elType == TextAreaT || e.elType == BodyT {
@@ -107,7 +117,7 @@ func (e *Elem) Callback(fn func(string)) {
 					text := Sprintf("wsEndPoint %s, %s", e.id, err)
 					Println(text)
 				}
-				fn("")
+				fn("", 0)
 			})
 		}
 	}()
@@ -625,6 +635,26 @@ func (gc *GuiCfg) GWB5RowNew(id string) Elem {
 	hEnd := `
 	</div>`
 	e := Elem{gc: gc, hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: RowT, js: ""}
+	return e
+}
+
+// GWB5RangeSliderNew creates a slider, pass a unique identifier, initial, min, max, step values.
+func (gc *GuiCfg) GWB5RangeSliderNew(id string, initial float32, min float32, max float32, step float32) Elem {
+	hStart := Sprintf(`
+	<input id="%s" type="range" class="form-range" min="%f" max="%f" step="%f" onchange="%s_func()">
+	`, id, min, max, step, id)
+	e := Elem{gc: gc, hStart: hStart, hEnd: "", html: hStart, id: id, elType: RSliderT, js: ""}
+
+	addr := Sprintf("/%s", e.id)
+	e.js = Sprintf(`
+	function %s_func(e) {
+		xhr = new XMLHttpRequest();
+		xhr.open("POST", "%s", true);
+		var val = document.getElementById("%s").value; 
+		xhr.send(val);
+	}
+	document.getElementById("%s").value = "%f"; 
+	`, e.id, addr, e.id, e.id, initial)
 	return e
 }
 

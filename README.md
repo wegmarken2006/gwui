@@ -41,7 +41,7 @@ func main() {
 	body := gc.GWB5Init("mini")
 
 	//mandatory: callback on body
-	body.Callback(func(string) {})
+	body.Callback(func(string, int) {})
 	gc.Body = &body
 
 	bt1 := gc.GWB5ButtonNew("btn-primary", "bt1", "Count")

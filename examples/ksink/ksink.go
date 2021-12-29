@@ -14,9 +14,9 @@ func main() {
 	gc := gw.GuiCfg{Port: 9000, BrowserStart: true}
 	body := gc.GWB5Init("gwui test")
 	//mandatory: callback on body
-	body.Callback(func(string) {})
+	body.Callback(func(string, int) {})
 	gc.Body = &body
-	body.SetBackgroundImage("sunset.jpg", 100)
+	body.SetBackgroundImage("abstract.jpg", 100)
 
 	bt1 := gc.GWB5ButtonNew("btn-primary", "bt1", "Change")
 	lb1 := gc.GWB5LabelNew("lb1", "Change text color")
@@ -31,16 +31,19 @@ func main() {
 	it4 := gc.GWB5InputTextNew("i4")
 
 	lb5 := gc.GWB5LabelNew("lb5", "Select font family")
+
+	lb6 := gc.GWB5LabelNew("lb6", "50")
+
 	dd5 := gc.GWB5DropDownNew("btn-warning", "dd5",
 		"Font Family", []string{"arial", "verdana", "monospace"})
 
-	lb10 := gc.GWB5LabelNew("lb5", "Another tab")
+	lb10 := gc.GWB5LabelNew("lb10", "Another tab")
 
 	md1 := gc.GWB5ModalNew("m1bt1", "m2bt2", "TEXT INPUT", "Are you sure", "yes", "no")
 
 	ta1 := gc.GWB5TextAreaNew("ta1", 12)
 	//mandatory: callback on textarea
-	ta1.Callback(func(string) {})
+	ta1.Callback(func(string, int) {})
 
 	ta1.SetBackgroundColor("#ffe6e6")
 	ta1.SetColor("blue")
@@ -50,53 +53,59 @@ func main() {
 	cd1 := gc.GWB5CardNew("cd1", "Kitchen Sink", "Elements")
 	cd1.SetBackgroundColor("#eeffee")
 
-	img1 := gc.GWImageNew("img1", "sunset.jpg", 50, 50)
-	img2 := gc.GWImageNew("img2", "sunset.jpg", 100, 100)
-	img3 := gc.GWImageNew("img3", "sunset.jpg", 200, 200)
-	img4 := gc.GWImageNew("img4", "sunset.jpg", 400, 400)
+	img1 := gc.GWImageNew("img1", "abstract.jpg", 50, 50)
+	img2 := gc.GWImageNew("img2", "abstract.jpg", 100, 100)
+	img3 := gc.GWImageNew("img3", "abstract.jpg", 200, 200)
+	img4 := gc.GWImageNew("img4", "abstract.jpg", 300, 300)
+
+	rs1 := gc.GWB5RangeSliderNew("rs1", 50.0, 0.0, 100.0, 1.0)
 
 	tabs := gc.GWB5TabsNew([]string{"tb1", "tb2", "tab3"}, []string{"tab1", "tab2", "tab3"})
 
 	// callbacks
 
 	//first modal button
-	md1.SubElems[0].Callback(func(string) {
+	md1.SubElems[0].Callback(func(string, int) {
 		md1.ChanBool1 <- true
 	})
 
 	//second modal button
-	md1.SubElems[1].Callback(func(string) {
+	md1.SubElems[1].Callback(func(string, int) {
 		md1.ChanBool1 <- false
 	})
 
-	it4.Callback(func(value string) {
+	it4.Callback(func(strValue string, intValue int) {
 		md1.B5ModalShow()
 		yes := <-md1.ChanBool1
 		if yes {
-			text := Sprintf("From Input field: %s\n", value)
+			text := Sprintf("From Input field: %s\n", strValue)
 			ta1.WriteTextArea(text)
 		}
 
 	})
 
-	dd5.Callback(func(value string) {
-		ta1.ChangeFontFamily(value)
+	dd5.Callback(func(strValue string, intValue int) {
+		ta1.ChangeFontFamily(strValue)
 	})
 
-	bt1.Callback(func(string) {
+	bt1.Callback(func(string, int) {
 		ta1.ChangeColor("red")
 		bt1.ChangeText("Changed")
 		bt1.ChangeToDisable()
 	})
 
-	bt2.Callback(func(string) {
+	bt2.Callback(func(string, int) {
 		ta1.ChangeBackgroundColor("#66ffff")
 		bt2.ChangeText("Changed")
 	})
 
-	bt3.Callback(func(string) {
+	bt3.Callback(func(string, int) {
 		ta1.ChangeFontSize("large")
 		bt3.ChangeText("Changed")
+	})
+
+	rs1.Callback(func(strValue string, intValue int) {
+		lb6.ChangeText(strValue)
 	})
 
 	// place elements in a grid
@@ -161,8 +170,14 @@ func main() {
 	tabs.SubElems[1].Add(img2)
 	tabs.SubElems[1].Add(img3)
 	tabs.SubElems[1].Add(img4)
+	p1 := gc.GWParagraphNew("p1")
+	lb6.SetFontSize("large")
+	p1.Add(lb6)
+	p1.Add(rs1)
+	tabs.SubElems[1].Add(p1)
 
 	//Third tab content
+	lb10.SetColor("white")
 	tabs.SubElems[2].Add(lb10)
 
 	//final body additions; add modal to body directly
