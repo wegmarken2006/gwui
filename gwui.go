@@ -355,7 +355,12 @@ func (el *Elem) WriteTextArea(text string) {
 func (el *Elem) ChangeText(text string) {
 	gc := el.gc
 	if gc.Body.gs != nil {
-		toSend := Sprintf("TEXT@%s@%s", el.id, text)
+		var toSend string
+		if el.elType == ButtonT {
+			toSend = Sprintf("TEXT@%stext@%s", el.id, text)
+		} else {
+			toSend = Sprintf("TEXT@%s@%s", el.id, text)
+		}
 		gc.mutex.Lock()
 		defer gc.mutex.Unlock()
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
@@ -716,7 +721,30 @@ func (gc *GuiCfg) GWB5DropDownNew(id string, bType string, text string, list []s
 // GWB5ButtonNew creates a button, pass the B5 type, a unique identifier, the button text.
 func (gc *GuiCfg) GWB5ButtonNew(id string, bType string, text string) Elem {
 	hText := Sprintf(`
-	<button type="button" class="btn btn-%s m-2" id="%s" onclick="%s_func()">%s</button>`, bType, id, id, text)
+	<button type="button" class="btn btn-%s m-2" id="%s" onclick="%s_func()">
+	<span id="%stext">%s</span></button>`, bType, id, id, id, text)
+	//gc.fh.Write([]byte(hText))
+	e := Elem{gc: gc, hStart: hText, hEnd: "", html: hText, id: id, elType: ButtonT}
+
+	addr := Sprintf("/%s", e.id)
+	e.js = Sprintf(`
+	function %s_func() {
+		xhr = new XMLHttpRequest();
+		xhr.open("POST", "%s", true);
+		xhr.send();
+	}
+	`, e.id, addr)
+
+	return e
+}
+
+// GWB5ButtonNew creates a button, pass the B5 type, a unique identifier, the button text.
+func (gc *GuiCfg) GWB5ButtonWithIconNew(id string, bType string, iconName string, text string) Elem {
+	hText := Sprintf(`
+	<button type="button" class="btn btn-%s m-2" id="%s" onclick="%s_func()">
+	<span class="btn-label">
+	<img src="static/bootstrap-icons/%s.svg" alt="" width="16" height="16"></i></span>
+	<span id="%stext">%s</span></button>`, bType, id, id, iconName, id, text)
 	//gc.fh.Write([]byte(hText))
 	e := Elem{gc: gc, hStart: hText, hEnd: "", html: hText, id: id, elType: ButtonT}
 

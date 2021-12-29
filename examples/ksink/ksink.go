@@ -18,13 +18,14 @@ func main() {
 	gc.Body = &body
 	body.SetBackgroundImage("abstract.jpg", 100)
 
-	bt1 := gc.GWB5ButtonNew("bt1", "primary", "Change")
+	//bt1 := gc.GWB5ButtonNew("bt1", "primary", "Change")
+	bt1 := gc.GWB5ButtonWithIconNew("bt1", "primary", "brush", "Change")
 	lb1 := gc.GWB5LabelNew("lb1", "Change text color")
 
-	bt2 := gc.GWB5ButtonNew("bt2", "secondary", "Change")
+	bt2 := gc.GWB5ButtonWithIconNew("bt2", "secondary", "brush-fill", "Change")
 	lb2 := gc.GWB5LabelNew("lb2", "Change text background color")
 
-	bt3 := gc.GWB5ButtonNew("bt3", "success", "Change")
+	bt3 := gc.GWB5ButtonWithIconNew("bt3", "success", "box-arrow-up-right", "Change")
 	lb3 := gc.GWB5LabelNew("lb3", "Change text size")
 
 	lb4 := gc.GWB5LabelNew("lb4", "Input text with Modal")

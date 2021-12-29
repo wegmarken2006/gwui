@@ -1,5 +1,5 @@
 # gwui
-## UI library based on Bootstrap 5.1.3.
+## UI library based on Bootstrap 5.1.3.and Bootstrap Icons 1.7.2.
 ### UI is served on localhost, then the default browser can be automatically launched.
 ### HTTP POST used for UI -> logic messages.
 ### Websockets used for logic -> UI messages. 
@@ -15,6 +15,7 @@
 |----static
 |    | web2.css
 |    |----bootstrap
+|    |----bootstrap-icons
 ```
 ### Copy the static folder from the [examples](./examples) here.
 ### Optionally, use web2.css for further customizations.
