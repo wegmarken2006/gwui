@@ -93,6 +93,7 @@ func main() {
 		ta1.ChangeColor("red")
 		bt1.ChangeText("Changed")
 		bt1.ChangeToDisable()
+		img4.ChangeImage("sunset.jpg")
 	})
 
 	bt2.Callback(func(string, int) {

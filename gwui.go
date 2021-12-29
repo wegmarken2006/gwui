@@ -289,7 +289,12 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
 			else  {
 				item.disabled = true;
 			}
-		}		
+		}
+		else if (type === "IMAGE") {
+			src = 'static/' + messages[2]; 
+			item.src = src
+		}
+		
 	};
 	`, addr, e.id, e.id)
 
@@ -348,6 +353,20 @@ func (el *Elem) WriteTextArea(text string) {
 	}
 	if el.gs == nil {
 		Println("No WriteTextArea, Set", el.id, "Callback!")
+	}
+}
+
+// ChangeText changes on the run an element text.
+func (el *Elem) ChangeImage(text string) {
+	gc := el.gc
+	if gc.Body.gs != nil {
+		var toSend string
+		toSend = Sprintf("IMAGE@%s@%s", el.id, text)
+		gc.mutex.Lock()
+		defer gc.mutex.Unlock()
+		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
+	} else {
+		Println("Failed Image change, Set", gc.Body.id, "Callback!")
 	}
 }
 
