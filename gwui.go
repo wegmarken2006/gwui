@@ -51,6 +51,7 @@ type Elem struct {
 	subStart  string
 	subEnd    string
 	ChanBool1 chan bool
+	gc        *GuiCfg
 }
 type GuiCfg struct {
 	fh           fp.File
@@ -60,20 +61,6 @@ type GuiCfg struct {
 	Body         *Elem
 	Port         int
 	BrowserStart bool
-}
-
-func (gc *GuiCfg) GWWriteTextArea(e Elem, text string) {
-	gc.mutex.Lock()
-	defer gc.mutex.Unlock()
-	if e.elType == TextAreaT && e.gs != nil {
-		err := e.gs.WriteMessage(websocket.TextMessage, []byte(text))
-		if err != nil {
-			Println("Write Error", err)
-		}
-	}
-	if e.gs == nil {
-		Println("No WriteTextArea, Set", e.id, "Callback!")
-	}
 }
 
 func (e *Elem) Add(n Elem) {
@@ -101,8 +88,13 @@ func (e *Elem) Callback(fn func(string)) {
 				buf := make([]byte, BUFFER_SIZE)
 				inp := r.Body
 				inp.Read(buf)
-				buf = buf[:r.ContentLength]
-				fn(string(buf))
+				value := string(buf[:r.ContentLength])
+				if e.elType == DDownT {
+					//change button text with selected item
+					e.ChangeText(value)
+
+				}
+				fn(value)
 			})
 
 		} else if e.elType == TextAreaT || e.elType == BodyT {
@@ -242,7 +234,7 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
 	<script type="text/javascript" src="/static/web2.js"></script>
 	
 	</html>`
-	e := Elem{hStart: hStart, hEnd: hEnd, html: hStart, id: "body", elType: BodyT}
+	e := Elem{gc: gc, hStart: hStart, hEnd: hEnd, html: hStart, id: "body", elType: BodyT}
 
 	addr := Sprintf("/%s", e.id)
 	e.js = Sprintf(`
@@ -292,79 +284,102 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
 	return e
 }
 
-func (gc *GuiCfg) GWB5ModalShow(el Elem) {
-	gc.mutex.Lock()
-	defer gc.mutex.Unlock()
-	if gc.Body.gs != nil {
+func (el *Elem) B5ModalShow() {
+	gc := el.gc
+	if el.elType == ModalT && gc.Body.gs != nil {
 		toSend := Sprintf("MODALSHOW@%s@%s", el.id, "dummy")
+		gc.mutex.Lock()
+		defer gc.mutex.Unlock()
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
-	} else {
+	}
+	if gc.Body.gs == nil {
 		Println("Failed Modal Show, Set", gc.Body.id, "Callback!")
 	}
 }
 
-// GWChangeToDisable changes on the run an element status to disable.
-func (gc *GuiCfg) GWChangeToDisable(el Elem) {
-	gc.mutex.Lock()
-	defer gc.mutex.Unlock()
+// ChangeToDisable changes on the run an element status to disable.
+func (el *Elem) ChangeToDisable() {
+	gc := el.gc
 	if gc.Body.gs != nil {
 		toSend := Sprintf("ENABLE@%s@%s", el.id, "DISABLE")
+		gc.mutex.Lock()
+		defer gc.mutex.Unlock()
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
 		Println("Failed Disable, Set", gc.Body.id, "Callback!")
 	}
 }
 
-// GWChangeToEnable changes on the run an element status to enable.
-func (gc *GuiCfg) GWChangeToEnable(el Elem) {
-	gc.mutex.Lock()
-	defer gc.mutex.Unlock()
+// ChangeToEnable changes on the run an element status to enable.
+func (el *Elem) ChangeToEnable() {
+	gc := el.gc
+
 	if gc.Body.gs != nil {
 		toSend := Sprintf("ENABLE@%s@%s", el.id, "ENABLE")
+		gc.mutex.Lock()
+		defer gc.mutex.Unlock()
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
 		Println("Failed Disable, Set", gc.Body.id, "Callback!")
 	}
 }
 
-// GWChangeText changes on the run an element text.
-func (gc *GuiCfg) GWChangeText(el Elem, text string) {
-	gc.mutex.Lock()
-	defer gc.mutex.Unlock()
+func (el *Elem) WriteTextArea(text string) {
+	gc := el.gc
+	if el.elType == TextAreaT && el.gs != nil {
+		gc.mutex.Lock()
+		defer gc.mutex.Unlock()
+		err := el.gs.WriteMessage(websocket.TextMessage, []byte(text))
+		if err != nil {
+			Println("Write Error", err)
+		}
+	}
+	if el.gs == nil {
+		Println("No WriteTextArea, Set", el.id, "Callback!")
+	}
+}
+
+// ChangeText changes on the run an element text.
+func (el *Elem) ChangeText(text string) {
+	gc := el.gc
 	if gc.Body.gs != nil {
 		toSend := Sprintf("TEXT@%s@%s", el.id, text)
+		gc.mutex.Lock()
+		defer gc.mutex.Unlock()
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
 		Println("Failed Text change, Set", gc.Body.id, "Callback!")
 	}
 }
 
-// GWChangeFontFamily changes on the run an element font family.
-func (gc *GuiCfg) GWChangeFontFamily(el Elem, text string) {
-	gc.mutex.Lock()
-	defer gc.mutex.Unlock()
+// ChangeFontFamily changes on the run an element font family.
+func (el *Elem) ChangeFontFamily(text string) {
+	gc := el.gc
 	if gc.Body.gs != nil {
 		toSend := Sprintf("FONTFAMILY@%s@%s", el.id, text)
+		gc.mutex.Lock()
+		defer gc.mutex.Unlock()
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
 		Println("Failed Font change, Set", gc.Body.id, "Callback!")
 	}
 }
 
-// GWChangeColor changes on the run an element color.
-func (gc *GuiCfg) GWChangeColor(el Elem, text string) {
-	gc.mutex.Lock()
-	defer gc.mutex.Unlock()
+// ChangeColor changes on the run an element color.
+func (el *Elem) ChangeColor(text string) {
+	gc := el.gc
 	if gc.Body.gs != nil {
 		toSend := Sprintf("COLOR@%s@%s", el.id, text)
+		gc.mutex.Lock()
+		defer gc.mutex.Unlock()
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
 		Println("Failed Color change, Set", gc.Body.id, "Callback!")
 	}
 }
 
-// GWSetBackgroundColor sets an element background color.
-func (gc *GuiCfg) GWSetBackgroundColor(el *Elem, text string) {
+// SetBackgroundColor sets an element background color.
+func (el *Elem) SetBackgroundColor(text string) {
 	var js string
 	if el.elType == BodyT {
 		js = Sprintf(`
@@ -380,8 +395,8 @@ func (gc *GuiCfg) GWSetBackgroundColor(el *Elem, text string) {
 	el.js = el.js + js
 }
 
-// GWSetToDisable sets an element status to disabled.
-func (gc *GuiCfg) GWSetToDisable(el *Elem) {
+// SetToDisable sets an element status to disabled.
+func (el *Elem) SetToDisable() {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
 	item.disabled = true;		
@@ -389,8 +404,8 @@ func (gc *GuiCfg) GWSetToDisable(el *Elem) {
 	el.js = el.js + js
 }
 
-// GWSetToEnable sets an element status to enabled.
-func (gc *GuiCfg) GWSetToEnable(el *Elem) {
+// SetToEnable sets an element status to enabled.
+func (el *Elem) SetToEnable() {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
 	item.disabled = false;		
@@ -398,8 +413,8 @@ func (gc *GuiCfg) GWSetToEnable(el *Elem) {
 	el.js = el.js + js
 }
 
-// GWSetColor sets an element foreground color.
-func (gc *GuiCfg) GWSetColor(el *Elem, text string) {
+// SetColor sets an element foreground color.
+func (el *Elem) SetColor(text string) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
 	item.style.color = "%s";		
@@ -407,8 +422,8 @@ func (gc *GuiCfg) GWSetColor(el *Elem, text string) {
 	el.js = el.js + js
 }
 
-// GWSetFontSize sets an element font size.
-func (gc *GuiCfg) GWSetFontSize(el *Elem, text string) {
+// SetFontSize sets an element font size.
+func (el *Elem) SetFontSize(text string) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
 	item.style.fontSize = "%s";		
@@ -417,7 +432,7 @@ func (gc *GuiCfg) GWSetFontSize(el *Elem, text string) {
 }
 
 // GWSetFontFamily sets an element font family.
-func (gc *GuiCfg) GWSetFontFamily(el *Elem, text string) {
+func (el *Elem) SetFontFamily(text string) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
 	item.style.fontFamily = "%s";		
@@ -425,33 +440,35 @@ func (gc *GuiCfg) GWSetFontFamily(el *Elem, text string) {
 	el.js = el.js + js
 }
 
-// GWChangeBackgroundColor changes on the run an element background color.
-func (gc *GuiCfg) GWChangeBackgroundColor(el Elem, text string) {
-	gc.mutex.Lock()
-	defer gc.mutex.Unlock()
+// ChangeBackgroundColor changes on the run an element background color.
+func (el *Elem) ChangeBackgroundColor(text string) {
+	gc := el.gc
 	if gc.Body.gs != nil {
 		toSend := Sprintf("BCOLOR@%s@%s", el.id, text)
+		gc.mutex.Lock()
+		defer gc.mutex.Unlock()
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
 		Println("Failed Background Color change, Set", gc.Body.id, "Callback!")
 	}
 }
 
-// GWChangeFontSize changes on the run an element font size.
-func (gc *GuiCfg) GWChangeFontSize(el Elem, text string) {
-	gc.mutex.Lock()
-	defer gc.mutex.Unlock()
+// ChangeFontSize changes on the run an element font size.
+func (el *Elem) ChangeFontSize(text string) {
+	gc := el.gc
 	if gc.Body.gs != nil {
 		toSend := Sprintf("FONTSIZE@%s@%s", el.id, text)
+		gc.mutex.Lock()
+		defer gc.mutex.Unlock()
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
 		Println("Failed Font Size change, Set", gc.Body.id, "Callback!")
 	}
 }
 
-// GWB5Tabs creates a nav-tabs; pass a vector of unique ids;
+// GWB5TabsNew creates a nav-tabs; pass a vector of unique ids;
 // pass a vector of tab texts; contained tabs are returned as SubElems.
-func (gc *GuiCfg) GWB5Tabs(ids []string, texts []string) Elem {
+func (gc *GuiCfg) GWB5TabsNew(ids []string, texts []string) Elem {
 	var elems []Elem
 	hText := `
 	<ul class="nav nav-tabs">
@@ -476,7 +493,7 @@ func (gc *GuiCfg) GWB5Tabs(ids []string, texts []string) Elem {
 	%s
 	</ul>
 	`, hText)
-	tabs := Elem{hStart: hText, hEnd: "", html: hText, id: "tabs", elType: TabsT, js: ""}
+	tabs := Elem{gc: gc, hStart: hText, hEnd: "", html: hText, id: "tabs", elType: TabsT, js: ""}
 
 	for ind, id := range ids {
 		var paneType string
@@ -490,7 +507,7 @@ func (gc *GuiCfg) GWB5Tabs(ids []string, texts []string) Elem {
 		`, paneType, id)
 		hEnd := `
 		</div>`
-		e := Elem{hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: TPaneT, js: ""}
+		e := Elem{gc: gc, hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: TPaneT, js: ""}
 		elems = append(elems, e)
 	}
 	tabs.subStart = `<div class="tab-content">`
@@ -499,19 +516,19 @@ func (gc *GuiCfg) GWB5Tabs(ids []string, texts []string) Elem {
 	return tabs
 }
 
-// GWParagraph creates a paragraph; pass a unique identifier.
-func (gc *GuiCfg) GWParagraph(id string) Elem {
+// GWParagraphNew creates a paragraph; pass a unique identifier.
+func (gc *GuiCfg) GWParagraphNew(id string) Elem {
 	hStart := Sprintf(`
 	<p id="%s">`, id)
 	hEnd := `
 	</p>`
-	e := Elem{hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: ParagraphT, js: ""}
+	e := Elem{gc: gc, hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: ParagraphT, js: ""}
 	return e
 }
 
-// GWB5Modal creates a Modal Dialog; pass 2 unique identifiers for the buttons
+// GWB5ModalNew creates a Modal Dialog; pass 2 unique identifiers for the buttons
 // title and general text, button texts.
-func (gc *GuiCfg) GWB5Modal(id1 string, id2 string,
+func (gc *GuiCfg) GWB5ModalNew(id1 string, id2 string,
 	title string, text string, bt1Text string, bt2Text string) Elem {
 	hStart := Sprintf(`
 	<div class="modal" tabindex="-1" id="%s%s">
@@ -532,10 +549,10 @@ func (gc *GuiCfg) GWB5Modal(id1 string, id2 string,
 	</div>`, id1, id2, title, text, id1, bt1Text, id2, bt2Text)
 
 	ch := make(chan bool)
-	e := Elem{hStart: hStart, hEnd: "", html: hStart, id: id1 + id2,
+	e := Elem{gc: gc, hStart: hStart, hEnd: "", html: hStart, id: id1 + id2,
 		elType: ModalT, js: "", ChanBool1: ch}
-	e1 := Elem{id: id1, elType: ButtonT}
-	e2 := Elem{id: id2, elType: ButtonT}
+	e1 := Elem{gc: gc, id: id1, elType: ButtonT}
+	e2 := Elem{gc: gc, id: id2, elType: ButtonT}
 	e.SubElems = []Elem{e1, e2}
 	addr1 := Sprintf("/%s", id1)
 	addr2 := Sprintf("/%s", id2)
@@ -555,8 +572,8 @@ func (gc *GuiCfg) GWB5Modal(id1 string, id2 string,
 	return e
 }
 
-// GWB5Card creates a card; pass a unique identifier, header and title text.
-func (gc *GuiCfg) GWB5Card(id string, header string, title string) Elem {
+// GWB5CardNew creates a card; pass a unique identifier, header and title text.
+func (gc *GuiCfg) GWB5CardNew(id string, header string, title string) Elem {
 	hStart := Sprintf(`
 	<div class="card">
 	<h5 class="card-header">%s</h5>
@@ -565,33 +582,33 @@ func (gc *GuiCfg) GWB5Card(id string, header string, title string) Elem {
 	hEnd := `
 	</div>
 	</div>`
-	e := Elem{hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: CardT, js: ""}
+	e := Elem{gc: gc, hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: CardT, js: ""}
 	return e
 }
 
-// GWB5Row creates a row, pass a unique identifier.
-func (gc *GuiCfg) GWB5Row(id string) Elem {
+// GWB5RowNew creates a row, pass a unique identifier.
+func (gc *GuiCfg) GWB5RowNew(id string) Elem {
 	hStart := Sprintf(`
 	<div class="row" id="%s">`, id)
 	hEnd := `
 	</div>`
-	e := Elem{hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: RowT, js: ""}
+	e := Elem{gc: gc, hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: RowT, js: ""}
 	return e
 }
 
-// GWB5Col creates a col, pass a unique identifier.
-func (gc *GuiCfg) GWB5Col(id string) Elem {
+// GWB5ColNew creates a col, pass a unique identifier.
+func (gc *GuiCfg) GWB5ColNew(id string) Elem {
 	hStart := Sprintf(`
 	<div class="col" id="%s">`, id)
 	hEnd := `
 	</div>`
-	e := Elem{hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: ColT, js: ""}
+	e := Elem{gc: gc, hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: ColT, js: ""}
 	return e
 }
 
-// GWB5DropDown creates a button dropdown; pass the B5 button type,
+// GWB5DropDownNew creates a button dropdown; pass the B5 button type,
 // a unique identifier, the button text and the list of options.
-func (gc *GuiCfg) GWB5DropDown(bType string, id string, text string, list []string) Elem {
+func (gc *GuiCfg) GWB5DropDownNew(bType string, id string, text string, list []string) Elem {
 	hText := Sprintf(`
 	<div class="dropdown">
   	<button class="btn %s m-2 dropdown-toggle" type="button" id="%s" data-bs-toggle="dropdown" aria-expanded="false" >
@@ -607,7 +624,7 @@ func (gc *GuiCfg) GWB5DropDown(bType string, id string, text string, list []stri
   	</ul>
   	</div>`
 
-	e := Elem{hStart: hText, hEnd: "", html: hText, id: id, elType: DDownT}
+	e := Elem{gc: gc, hStart: hText, hEnd: "", html: hText, id: id, elType: DDownT}
 
 	addr := Sprintf("/%s", e.id)
 	e.js = Sprintf(`
@@ -622,12 +639,12 @@ func (gc *GuiCfg) GWB5DropDown(bType string, id string, text string, list []stri
 	return e
 }
 
-// GWB5Button creates a button, pass the B5 type, a unique identifier, the button text.
-func (gc *GuiCfg) GWB5Button(bType string, id string, text string) Elem {
+// GWB5ButtonNew creates a button, pass the B5 type, a unique identifier, the button text.
+func (gc *GuiCfg) GWB5ButtonNew(bType string, id string, text string) Elem {
 	hText := Sprintf(`
 	<button type="button" class="btn %s m-2" id="%s" onclick="%s_func()">%s</button>`, bType, id, id, text)
 	//gc.fh.Write([]byte(hText))
-	e := Elem{hStart: hText, hEnd: "", html: hText, id: id, elType: ButtonT}
+	e := Elem{gc: gc, hStart: hText, hEnd: "", html: hText, id: id, elType: ButtonT}
 
 	addr := Sprintf("/%s", e.id)
 	e.js = Sprintf(`
@@ -641,12 +658,12 @@ func (gc *GuiCfg) GWB5Button(bType string, id string, text string) Elem {
 	return e
 }
 
-// GWB5InputText creates a input text field; pass a unique identifier.
-func (gc *GuiCfg) GWB5InputText(id string) Elem {
+// GWB5InputTextNew creates a input text field; pass a unique identifier.
+func (gc *GuiCfg) GWB5InputTextNew(id string) Elem {
 	hStart := Sprintf(`
 	<input type="text" class="m-2" id="%s" name="%s" onkeypress="%s_func(event)">
 	`, id, id, id)
-	e := Elem{hStart: hStart, hEnd: "", html: hStart, id: id, elType: ITextT}
+	e := Elem{gc: gc, hStart: hStart, hEnd: "", html: hStart, id: id, elType: ITextT}
 	addr := Sprintf("/%s", e.id)
 	e.js = Sprintf(`
 	function %s_func(e) {
@@ -662,24 +679,24 @@ func (gc *GuiCfg) GWB5InputText(id string) Elem {
 	return e
 }
 
-// GWB5Label creates a label; pass a unique identifier and the label text.
-func (gc *GuiCfg) GWB5Label(id string, text string) Elem {
+// GWB5LabelNew creates a label; pass a unique identifier and the label text.
+func (gc *GuiCfg) GWB5LabelNew(id string, text string) Elem {
 	hText := Sprintf(`
 	<label class="m-2" id=%s>%s</label>`, id, text)
 	//gc.fh.Write([]byte(hText))
-	e := Elem{hStart: hText, hEnd: "", html: hText, id: id, elType: LabelT, js: ""}
+	e := Elem{gc: gc, hStart: hText, hEnd: "", html: hText, id: id, elType: LabelT, js: ""}
 	return e
 }
 
-// GWB5TextArea creates a textarea; pass a unique identifier and the number of rows.
+// GWB5TextAreaNew creates a textarea; pass a unique identifier and the number of rows.
 // Remember to attach a callback to handle output om the area.
-func (gc *GuiCfg) GWB5TextArea(id string, rows int) Elem {
+func (gc *GuiCfg) GWB5TextAreaNew(id string, rows int) Elem {
 	hText := Sprintf(`
 	<div class="form-group mx-2" style="min-width: 90%c">
 	<p><textarea class="form-control" id=%s rows="%d"></textarea></p>
 	</div>`, '%', id, rows)
 	//gc.fh.Write([]byte(hText))
-	e := Elem{hStart: hText, hEnd: "", html: hText, id: id, elType: TextAreaT}
+	e := Elem{gc: gc, hStart: hText, hEnd: "", html: hText, id: id, elType: TextAreaT}
 
 	addr := Sprintf("/%s", e.id)
 	e.js = Sprintf(`

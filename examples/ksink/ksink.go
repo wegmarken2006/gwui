@@ -16,42 +16,42 @@ func main() {
 	//mandatory: callback on body
 	body.Callback(func(string) {})
 	gc.Body = &body
-	gc.GWSetBackgroundColor(&body, "#ccffcc")
+	body.SetBackgroundColor("#ccffcc")
 
-	bt1 := gc.GWB5Button("btn-primary", "bt1", "Change")
-	lb1 := gc.GWB5Label("lb1", "Change text color")
+	bt1 := gc.GWB5ButtonNew("btn-primary", "bt1", "Change")
+	lb1 := gc.GWB5LabelNew("lb1", "Change text color")
 
-	bt2 := gc.GWB5Button("btn-secondary", "bt2", "Change")
-	lb2 := gc.GWB5Label("lb2", "Change text background color")
+	bt2 := gc.GWB5ButtonNew("btn-secondary", "bt2", "Change")
+	lb2 := gc.GWB5LabelNew("lb2", "Change text background color")
 
-	bt3 := gc.GWB5Button("btn-success", "bt3", "Change")
-	lb3 := gc.GWB5Label("lb3", "Change text size")
+	bt3 := gc.GWB5ButtonNew("btn-success", "bt3", "Change")
+	lb3 := gc.GWB5LabelNew("lb3", "Change text size")
 
-	lb4 := gc.GWB5Label("lb4", "Input text with Modal")
-	it4 := gc.GWB5InputText("i4")
+	lb4 := gc.GWB5LabelNew("lb4", "Input text with Modal")
+	it4 := gc.GWB5InputTextNew("i4")
 
-	lb5 := gc.GWB5Label("lb5", "Select font family")
-	dd5 := gc.GWB5DropDown("btn-warning", "dd5",
+	lb5 := gc.GWB5LabelNew("lb5", "Select font family")
+	dd5 := gc.GWB5DropDownNew("btn-warning", "dd5",
 		"Font Family", []string{"arial", "verdana", "monospace"})
 
-	lb10 := gc.GWB5Label("lb5", "Another tab")
+	lb10 := gc.GWB5LabelNew("lb5", "Another tab")
 
-	md1 := gc.GWB5Modal("m1bt1", "m2bt2", "TEXT INPUT", "Are you sure", "yes", "no")
+	md1 := gc.GWB5ModalNew("m1bt1", "m2bt2", "TEXT INPUT", "Are you sure", "yes", "no")
 
-	ta1 := gc.GWB5TextArea("ta1", 12)
+	ta1 := gc.GWB5TextAreaNew("ta1", 12)
 	//mandatory: callback on textarea
 	ta1.Callback(func(string) {})
 
-	gc.GWSetBackgroundColor(&ta1, "#ffe6e6")
-	gc.GWSetColor(&ta1, "blue")
-	gc.GWSetFontSize(&ta1, "small")
-	gc.GWSetFontFamily(&ta1, "monospace")
+	ta1.SetBackgroundColor("#ffe6e6")
+	ta1.SetColor("blue")
+	ta1.SetFontSize("small")
+	ta1.SetFontFamily("monospace")
 
-	cd1 := gc.GWB5Card("cd1", "Kitchen Sink", "Elements")
-	gc.GWSetBackgroundColor(&cd1, "#eeffee")
-	gc.GWSetColor(&cd1, "green")
+	cd1 := gc.GWB5CardNew("cd1", "Kitchen Sink", "Elements")
+	cd1.SetBackgroundColor("#eeffee")
+	cd1.SetColor("green")
 
-	tabs := gc.GWB5Tabs([]string{"tb1", "tb2"}, []string{"tab1", "tab2"})
+	tabs := gc.GWB5TabsNew([]string{"tb1", "tb2"}, []string{"tab1", "tab2"})
 
 	// callbacks
 
@@ -66,55 +66,55 @@ func main() {
 	})
 
 	it4.Callback(func(value string) {
-		gc.GWB5ModalShow(md1)
+		md1.B5ModalShow()
 		yes := <-md1.ChanBool1
 		if yes {
 			text := Sprintf("From Input field: %s\n", value)
-			gc.GWWriteTextArea(ta1, text)
+			ta1.WriteTextArea(text)
 		}
 
 	})
 
 	dd5.Callback(func(value string) {
-		gc.GWChangeFontFamily(ta1, value)
+		ta1.ChangeFontFamily(value)
 	})
 
 	bt1.Callback(func(string) {
-		gc.GWChangeColor(ta1, "red")
-		gc.GWChangeText(bt1, "Changed")
-		gc.GWChangeToDisable(bt1)
+		ta1.ChangeColor("red")
+		bt1.ChangeText("Changed")
+		bt1.ChangeToDisable()
 	})
 
 	bt2.Callback(func(string) {
-		gc.GWChangeBackgroundColor(ta1, "#66ffff")
-		gc.GWChangeText(bt2, "Changed")
+		ta1.ChangeBackgroundColor("#66ffff")
+		bt2.ChangeText("Changed")
 	})
 
 	bt3.Callback(func(string) {
-		gc.GWChangeFontSize(ta1, "large")
-		gc.GWChangeText(bt3, "Changed")
+		ta1.ChangeFontSize("large")
+		bt3.ChangeText("Changed")
 	})
 
 	// place elements in a grid
 
-	r1 := gc.GWB5Row("r1")
-	r11 := gc.GWB5Row("r11")
-	r12 := gc.GWB5Row("r12")
-	r13 := gc.GWB5Row("r13")
-	r14 := gc.GWB5Row("r14")
-	r15 := gc.GWB5Row("r15")
-	c1 := gc.GWB5Col("c1")
-	c2 := gc.GWB5Col("c2")
-	c11 := gc.GWB5Col("c11")
-	c12 := gc.GWB5Col("c12")
-	c21 := gc.GWB5Col("c21")
-	c22 := gc.GWB5Col("c22")
-	c31 := gc.GWB5Col("c31")
-	c32 := gc.GWB5Col("c32")
-	c41 := gc.GWB5Col("c41")
-	c42 := gc.GWB5Col("c42")
-	c51 := gc.GWB5Col("c51")
-	c52 := gc.GWB5Col("c52")
+	r1 := gc.GWB5RowNew("r1")
+	r11 := gc.GWB5RowNew("r11")
+	r12 := gc.GWB5RowNew("r12")
+	r13 := gc.GWB5RowNew("r13")
+	r14 := gc.GWB5RowNew("r14")
+	r15 := gc.GWB5RowNew("r15")
+	c1 := gc.GWB5ColNew("c1")
+	c2 := gc.GWB5ColNew("c2")
+	c11 := gc.GWB5ColNew("c11")
+	c12 := gc.GWB5ColNew("c12")
+	c21 := gc.GWB5ColNew("c21")
+	c22 := gc.GWB5ColNew("c22")
+	c31 := gc.GWB5ColNew("c31")
+	c32 := gc.GWB5ColNew("c32")
+	c41 := gc.GWB5ColNew("c41")
+	c42 := gc.GWB5ColNew("c42")
+	c51 := gc.GWB5ColNew("c51")
+	c52 := gc.GWB5ColNew("c52")
 	c11.Add(lb1)
 	c12.Add(bt1)
 	c21.Add(lb2)
@@ -169,7 +169,7 @@ func main() {
 		for {
 			ind++
 			text := Sprintf("%d: All work and no play ...\n", ind)
-			gc.GWWriteTextArea(ta1, text)
+			ta1.WriteTextArea(text)
 			timeD := time.Duration(3000) * time.Millisecond
 			time.Sleep(timeD)
 		}

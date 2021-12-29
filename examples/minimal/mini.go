@@ -14,14 +14,14 @@ func main() {
 	body.Callback(func(string) {})
 	gc.Body = &body
 
-	bt1 := gc.GWB5Button("btn-primary", "bt1", "Count")
-	lb1 := gc.GWB5Label("lb1", "0")
+	bt1 := gc.GWB5ButtonNew("btn-primary", "bt1", "Count")
+	lb1 := gc.GWB5LabelNew("lb1", "0")
 
 	count := 0
 	bt1.Callback(func(string) {
 		count++
 		text := Sprintf("%d", count)
-		gc.GWChangeText(lb1, text)
+		lb1.ChangeText(text)
 	})
 
 	body.Add(lb1)
