@@ -14,7 +14,7 @@ func main() {
 	body.Callback(func(string, int) {})
 	gc.Body = &body
 
-	bt1 := gc.GWB5ButtonNew("btn-primary", "bt1", "Count")
+	bt1 := gc.GWB5ButtonNew("bt1", "primary", "Count")
 	lb1 := gc.GWB5LabelNew("lb1", "0")
 
 	count := 0

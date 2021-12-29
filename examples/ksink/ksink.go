@@ -18,13 +18,13 @@ func main() {
 	gc.Body = &body
 	body.SetBackgroundImage("abstract.jpg", 100)
 
-	bt1 := gc.GWB5ButtonNew("btn-primary", "bt1", "Change")
+	bt1 := gc.GWB5ButtonNew("bt1", "primary", "Change")
 	lb1 := gc.GWB5LabelNew("lb1", "Change text color")
 
-	bt2 := gc.GWB5ButtonNew("btn-secondary", "bt2", "Change")
+	bt2 := gc.GWB5ButtonNew("bt2", "secondary", "Change")
 	lb2 := gc.GWB5LabelNew("lb2", "Change text background color")
 
-	bt3 := gc.GWB5ButtonNew("btn-success", "bt3", "Change")
+	bt3 := gc.GWB5ButtonNew("bt3", "success", "Change")
 	lb3 := gc.GWB5LabelNew("lb3", "Change text size")
 
 	lb4 := gc.GWB5LabelNew("lb4", "Input text with Modal")
@@ -32,9 +32,7 @@ func main() {
 
 	lb5 := gc.GWB5LabelNew("lb5", "Select font family")
 
-	lb6 := gc.GWB5LabelNew("lb6", "50")
-
-	dd5 := gc.GWB5DropDownNew("btn-warning", "dd5",
+	dd5 := gc.GWB5DropDownNew("dd5", "warning",
 		"Font Family", []string{"arial", "verdana", "monospace"})
 
 	lb10 := gc.GWB5LabelNew("lb10", "Another tab")
@@ -59,6 +57,8 @@ func main() {
 	img4 := gc.GWImageNew("img4", "abstract.jpg", 300, 300)
 
 	rs1 := gc.GWB5RangeSliderNew("rs1", 50.0, 0.0, 100.0, 1.0)
+
+	pb1 := gc.GWB5PillBadgeNew("pb1", "danger", "50")
 
 	tabs := gc.GWB5TabsNew([]string{"tb1", "tb2", "tab3"}, []string{"tab1", "tab2", "tab3"})
 
@@ -105,7 +105,7 @@ func main() {
 	})
 
 	rs1.Callback(func(strValue string, intValue int) {
-		lb6.ChangeText(strValue)
+		pb1.ChangeText(strValue)
 	})
 
 	// place elements in a grid
@@ -171,8 +171,7 @@ func main() {
 	tabs.SubElems[1].Add(img3)
 	tabs.SubElems[1].Add(img4)
 	p1 := gc.GWParagraphNew("p1")
-	lb6.SetFontSize("large")
-	p1.Add(lb6)
+	p1.Add(pb1)
 	p1.Add(rs1)
 	tabs.SubElems[1].Add(p1)
 

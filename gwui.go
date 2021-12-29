@@ -39,6 +39,7 @@ const (
 	ModalT     = 12
 	ImageT     = 13
 	RSliderT   = 14
+	PBadgeT    = 15
 )
 
 type Elem struct {
@@ -628,16 +629,6 @@ func (gc *GuiCfg) GWB5CardNew(id string, header string, title string) Elem {
 	return e
 }
 
-// GWB5RowNew creates a row, pass a unique identifier.
-func (gc *GuiCfg) GWB5RowNew(id string) Elem {
-	hStart := Sprintf(`
-	<div class="row" id="%s">`, id)
-	hEnd := `
-	</div>`
-	e := Elem{gc: gc, hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: RowT, js: ""}
-	return e
-}
-
 // GWB5RangeSliderNew creates a slider, pass a unique identifier, initial, min, max, step values.
 func (gc *GuiCfg) GWB5RangeSliderNew(id string, initial float32, min float32, max float32, step float32) Elem {
 	hStart := Sprintf(`
@@ -658,6 +649,26 @@ func (gc *GuiCfg) GWB5RangeSliderNew(id string, initial float32, min float32, ma
 	return e
 }
 
+// GWB5PillBadgeNew creates a pill badge, pass a unique identifier, type, text.
+func (gc *GuiCfg) GWB5PillBadgeNew(id string, bType string, text string) Elem {
+	hStart := Sprintf(`
+	<span id="%s" class="badge rounded-pill bg-%s">%s</span>
+	`, id, bType, text)
+
+	e := Elem{gc: gc, hStart: hStart, hEnd: "", html: hStart, id: id, elType: PBadgeT, js: ""}
+	return e
+}
+
+// GWB5RowNew creates a row, pass a unique identifier.
+func (gc *GuiCfg) GWB5RowNew(id string) Elem {
+	hStart := Sprintf(`
+	<div class="row" id="%s">`, id)
+	hEnd := `
+	</div>`
+	e := Elem{gc: gc, hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: RowT, js: ""}
+	return e
+}
+
 // GWB5ColNew creates a col, pass a unique identifier.
 func (gc *GuiCfg) GWB5ColNew(id string) Elem {
 	hStart := Sprintf(`
@@ -670,13 +681,14 @@ func (gc *GuiCfg) GWB5ColNew(id string) Elem {
 
 // GWB5DropDownNew creates a button dropdown; pass the B5 button type,
 // a unique identifier, the button text and the list of options.
-func (gc *GuiCfg) GWB5DropDownNew(bType string, id string, text string, list []string) Elem {
+func (gc *GuiCfg) GWB5DropDownNew(id string, bType string, text string, list []string) Elem {
 	hText := Sprintf(`
 	<div class="dropdown">
-  	<button class="btn %s m-2 dropdown-toggle" type="button" id="%s" data-bs-toggle="dropdown" aria-expanded="false" >
+  	<button class="btn-%s m-2 dropdown-toggle" type="button" id="%s" data-bs-toggle="dropdown" aria-expanded="false" >
     %s
   	</button>
-  	<ul class="dropdown-menu" aria-labelledby="%s" id="%s%s" onclick="%s_func(event)">`, bType, id, text, id, id, id, id)
+  	<ul class="dropdown-menu" aria-labelledby="%s" id="%s%s" onclick="%s_func(event)">
+	`, bType, id, text, id, id, id, id)
 
 	for _, elem := range list {
 		hText = Sprintf(`%s
@@ -702,9 +714,9 @@ func (gc *GuiCfg) GWB5DropDownNew(bType string, id string, text string, list []s
 }
 
 // GWB5ButtonNew creates a button, pass the B5 type, a unique identifier, the button text.
-func (gc *GuiCfg) GWB5ButtonNew(bType string, id string, text string) Elem {
+func (gc *GuiCfg) GWB5ButtonNew(id string, bType string, text string) Elem {
 	hText := Sprintf(`
-	<button type="button" class="btn %s m-2" id="%s" onclick="%s_func()">%s</button>`, bType, id, id, text)
+	<button type="button" class="btn btn-%s m-2" id="%s" onclick="%s_func()">%s</button>`, bType, id, id, text)
 	//gc.fh.Write([]byte(hText))
 	e := Elem{gc: gc, hStart: hText, hEnd: "", html: hText, id: id, elType: ButtonT}
 
