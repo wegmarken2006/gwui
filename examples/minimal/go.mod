@@ -2,7 +2,7 @@ module mini
 
 go 1.17
 
-require github.com/wegmarken2006/gwui v1.0.2
+require github.com/wegmarken2006/gwui v1.0.3
 
 require (
 	github.com/gorilla/websocket v1.4.2 // indirect

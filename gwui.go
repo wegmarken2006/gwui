@@ -88,7 +88,7 @@ func (e *Elem) Add(n Elem) {
 	e.html = e.html + n.subEnd
 }
 
-// Event handler to be attached to elements; runs in its ownthread
+// Event handler to be attached to an element; it runs in its own thread.
 func (e *Elem) Callback(fn func(string)) {
 	go func() {
 		addr := Sprintf("/%s", e.id)
@@ -120,7 +120,7 @@ func (e *Elem) Callback(fn func(string)) {
 	}()
 }
 
-// Start the server anf launch the browser
+// GWRun starts the server and launches the browser.
 func (gc *GuiCfg) GWRun() {
 	const TRIES int = 5
 	var serveURL string
@@ -169,7 +169,8 @@ func (gc *GuiCfg) GWRun() {
 	}
 }
 
-// Write and close  html and js files
+// GWClose writes and closes web2.html and web2.js, where the
+// UI is implemented.
 func (gc *GuiCfg) GWClose(body Elem) {
 
 	gc.fh.Write([]byte(body.html))
@@ -200,7 +201,7 @@ func (gc *GuiCfg) GWWaitKeyFromCOnsole() {
 	}
 }
 
-// Create html and js files, return the Body element
+// GWB5Init creates web2.html and wen2.js files and returns the Body element.
 func (gc *GuiCfg) GWB5Init(title string) Elem {
 
 	if _, err := os.Stat("./static"); os.IsNotExist(err) {
@@ -302,7 +303,7 @@ func (gc *GuiCfg) GWB5ModalShow(el Elem) {
 	}
 }
 
-// Dynamically change element status to disable
+// GWChangeToDisable changes on the run an element status to disable.
 func (gc *GuiCfg) GWChangeToDisable(el Elem) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -314,7 +315,7 @@ func (gc *GuiCfg) GWChangeToDisable(el Elem) {
 	}
 }
 
-// Dynamically change element status to enable
+// GWChangeToEnable changes on the run an element status to enable.
 func (gc *GuiCfg) GWChangeToEnable(el Elem) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -326,7 +327,7 @@ func (gc *GuiCfg) GWChangeToEnable(el Elem) {
 	}
 }
 
-// Dynamically change element text
+// GWChangeText changes on the run an element text.
 func (gc *GuiCfg) GWChangeText(el Elem, text string) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -338,7 +339,7 @@ func (gc *GuiCfg) GWChangeText(el Elem, text string) {
 	}
 }
 
-// Dynamically change element font family
+// GWChangeFontFamily changes on the run an element font family.
 func (gc *GuiCfg) GWChangeFontFamily(el Elem, text string) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -350,7 +351,7 @@ func (gc *GuiCfg) GWChangeFontFamily(el Elem, text string) {
 	}
 }
 
-// Dynamically change element color
+// GWChangeColor changes on the run an element color.
 func (gc *GuiCfg) GWChangeColor(el Elem, text string) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -362,7 +363,7 @@ func (gc *GuiCfg) GWChangeColor(el Elem, text string) {
 	}
 }
 
-// Set initial element background color
+// GWSetBackgroundColor sets an element background color.
 func (gc *GuiCfg) GWSetBackgroundColor(el *Elem, text string) {
 	var js string
 	if el.elType == BodyT {
@@ -379,7 +380,7 @@ func (gc *GuiCfg) GWSetBackgroundColor(el *Elem, text string) {
 	el.js = el.js + js
 }
 
-// Set initial element status to disable
+// GWSetToDisable sets an element status to disabled.
 func (gc *GuiCfg) GWSetToDisable(el *Elem) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
@@ -388,7 +389,7 @@ func (gc *GuiCfg) GWSetToDisable(el *Elem) {
 	el.js = el.js + js
 }
 
-// Set initial element status to enable
+// GWSetToEnable sets an element status to enabled.
 func (gc *GuiCfg) GWSetToEnable(el *Elem) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
