@@ -398,7 +398,7 @@ func (gc *GuiCfg) GWSetToEnable(el *Elem) {
 	el.js = el.js + js
 }
 
-// Set initial element color
+// GWSetColor sets an element foreground color.
 func (gc *GuiCfg) GWSetColor(el *Elem, text string) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
@@ -407,7 +407,7 @@ func (gc *GuiCfg) GWSetColor(el *Elem, text string) {
 	el.js = el.js + js
 }
 
-// Set initial element font size
+// GWSetFontSize sets an element font size.
 func (gc *GuiCfg) GWSetFontSize(el *Elem, text string) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
@@ -416,7 +416,7 @@ func (gc *GuiCfg) GWSetFontSize(el *Elem, text string) {
 	el.js = el.js + js
 }
 
-// Set initial element font family
+// GWSetFontFamily sets an element font family.
 func (gc *GuiCfg) GWSetFontFamily(el *Elem, text string) {
 	js := Sprintf(`
 	var item = document.getElementById("%s");
@@ -425,7 +425,7 @@ func (gc *GuiCfg) GWSetFontFamily(el *Elem, text string) {
 	el.js = el.js + js
 }
 
-// Dynamically change element background color
+// GWChangeBackgroundColor changes on the run an element background color.
 func (gc *GuiCfg) GWChangeBackgroundColor(el Elem, text string) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -437,7 +437,7 @@ func (gc *GuiCfg) GWChangeBackgroundColor(el Elem, text string) {
 	}
 }
 
-// Dynamically change element font size
+// GWChangeFontSize changes on the run an element font size.
 func (gc *GuiCfg) GWChangeFontSize(el Elem, text string) {
 	gc.mutex.Lock()
 	defer gc.mutex.Unlock()
@@ -449,8 +449,8 @@ func (gc *GuiCfg) GWChangeFontSize(el Elem, text string) {
 	}
 }
 
-// Create nav-tabs; pass a vector of unique ids;
-// pass a vector of tab texts; contained tabs are returned as SubElems
+// GWB5Tabs creates a nav-tabs; pass a vector of unique ids;
+// pass a vector of tab texts; contained tabs are returned as SubElems.
 func (gc *GuiCfg) GWB5Tabs(ids []string, texts []string) Elem {
 	var elems []Elem
 	hText := `
@@ -499,7 +499,7 @@ func (gc *GuiCfg) GWB5Tabs(ids []string, texts []string) Elem {
 	return tabs
 }
 
-// Create paragraph; pass a unique identifier
+// GWParagraph creates a paragraph; pass a unique identifier.
 func (gc *GuiCfg) GWParagraph(id string) Elem {
 	hStart := Sprintf(`
 	<p id="%s">`, id)
@@ -509,8 +509,8 @@ func (gc *GuiCfg) GWParagraph(id string) Elem {
 	return e
 }
 
-// Modal Dialog; pass 2 unique identifier for the buttons
-// title and general text, button texts
+// GWB5Modal creates a Modal Dialog; pass 2 unique identifiers for the buttons
+// title and general text, button texts.
 func (gc *GuiCfg) GWB5Modal(id1 string, id2 string,
 	title string, text string, bt1Text string, bt2Text string) Elem {
 	hStart := Sprintf(`
@@ -555,7 +555,7 @@ func (gc *GuiCfg) GWB5Modal(id1 string, id2 string,
 	return e
 }
 
-// Create a card; pass a unique identifier, header and title text
+// GWB5Card creates a card; pass a unique identifier, header and title text.
 func (gc *GuiCfg) GWB5Card(id string, header string, title string) Elem {
 	hStart := Sprintf(`
 	<div class="card">
@@ -569,7 +569,7 @@ func (gc *GuiCfg) GWB5Card(id string, header string, title string) Elem {
 	return e
 }
 
-// Create a row, pass a unique identifier
+// GWB5Row creates a row, pass a unique identifier.
 func (gc *GuiCfg) GWB5Row(id string) Elem {
 	hStart := Sprintf(`
 	<div class="row" id="%s">`, id)
@@ -579,7 +579,7 @@ func (gc *GuiCfg) GWB5Row(id string) Elem {
 	return e
 }
 
-// Create a col, pass a unique identifier
+// GWB5Col creates a col, pass a unique identifier.
 func (gc *GuiCfg) GWB5Col(id string) Elem {
 	hStart := Sprintf(`
 	<div class="col" id="%s">`, id)
@@ -589,6 +589,8 @@ func (gc *GuiCfg) GWB5Col(id string) Elem {
 	return e
 }
 
+// GWB5DropDown creates a button dropdown; pass the B5 button type,
+// a unique identifier, the button text and the list of options.
 func (gc *GuiCfg) GWB5DropDown(bType string, id string, text string, list []string) Elem {
 	hText := Sprintf(`
 	<div class="dropdown">
@@ -620,7 +622,7 @@ func (gc *GuiCfg) GWB5DropDown(bType string, id string, text string, list []stri
 	return e
 }
 
-// Create a button, pass the B5 type, a unique identifier, the text
+// GWB5Button creates a button, pass the B5 type, a unique identifier, the button text.
 func (gc *GuiCfg) GWB5Button(bType string, id string, text string) Elem {
 	hText := Sprintf(`
 	<button type="button" class="btn %s m-2" id="%s" onclick="%s_func()">%s</button>`, bType, id, id, text)
@@ -639,7 +641,7 @@ func (gc *GuiCfg) GWB5Button(bType string, id string, text string) Elem {
 	return e
 }
 
-// Create a input text field; pass a unique identifier
+// GWB5InputText creates a input text field; pass a unique identifier.
 func (gc *GuiCfg) GWB5InputText(id string) Elem {
 	hStart := Sprintf(`
 	<input type="text" class="m-2" id="%s" name="%s" onkeypress="%s_func(event)">
@@ -660,7 +662,7 @@ func (gc *GuiCfg) GWB5InputText(id string) Elem {
 	return e
 }
 
-// Create a label; pass a unique identifier and the text
+// GWB5Label creates a label; pass a unique identifier and the label text.
 func (gc *GuiCfg) GWB5Label(id string, text string) Elem {
 	hText := Sprintf(`
 	<label class="m-2" id=%s>%s</label>`, id, text)
@@ -669,7 +671,8 @@ func (gc *GuiCfg) GWB5Label(id string, text string) Elem {
 	return e
 }
 
-// Create a textarea; pass a unique identifier and the number of rows
+// GWB5TextArea creates a textarea; pass a unique identifier and the number of rows.
+// Remember to attach a callback to handle output om the area.
 func (gc *GuiCfg) GWB5TextArea(id string, rows int) Elem {
 	hText := Sprintf(`
 	<div class="form-group mx-2" style="min-width: 90%c">
