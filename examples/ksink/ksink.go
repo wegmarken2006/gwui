@@ -16,7 +16,7 @@ func main() {
 	//mandatory: callback on body
 	body.Callback(func(string) {})
 	gc.Body = &body
-	body.SetBackgroundColor("#ccffcc")
+	body.SetBackgroundImage("sunset.jpg", 100)
 
 	bt1 := gc.GWB5ButtonNew("btn-primary", "bt1", "Change")
 	lb1 := gc.GWB5LabelNew("lb1", "Change text color")

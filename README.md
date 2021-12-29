@@ -3,7 +3,7 @@
 ### UI is served on localhost, then the default browser can be automatically launched.
 ### HTTP POST used for UI -> logic messages.
 ### Websockets used for logic -> UI messages. 
-### Intended for simple personal utility tools, don't use for security critical applications as it doesn't use HTTPS.
+### It is intended for simple personal utility tools, don't use for security critical applications as it doesn't use HTTPS.
 
 ### Still  under development.
 ###

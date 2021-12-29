@@ -391,7 +391,28 @@ func (el *Elem) SetBackgroundColor(text string) {
 		item.style.backgroundColor = "%s";		
 		`, el.id, text)
 	}
+	el.js = el.js + js
+}
 
+// SetBackgroundImage sets an element background image.
+// The image must reside in the static/ folder.
+// Opacity is expressed as %; pass 100 for no transparency.
+func (el *Elem) SetBackgroundImage(fileName string, opacity int) {
+	var js string
+	if el.elType == BodyT {
+		js = Sprintf(`
+		document.body.style.backgroundImage = "url('static/%s')";	
+		document.body.style.backgroundSize = "cover";	
+		document.body.style.opacity = "%d%c";	
+		`, fileName, opacity, '%')
+	} else {
+		js = Sprintf(`
+		var item = document.getElementById("%s");
+		item.style.backgroundImage = "url('%s')";		
+		item.style.backgroundSize = "cover";	
+		item.style.opacity = "%d%c";		
+		`, el.id, fileName, opacity, '%')
+	}
 	el.js = el.js + js
 }
 
