@@ -1,14 +1,14 @@
 module ksink
 
-//replace github.com/wegmarken2006/gwui v1.0.5 => ../../../gwui
+//replace github.com/wegmarken2006/gwui v1.0.6 => ../../../gwui
 
-require github.com/wegmarken2006/gwui v1.0.5
+require github.com/wegmarken2006/gwui v1.0.6
 
 require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
 	github.com/wegmarken2006/filepanic v1.0.2 // indirect
-	golang.org/x/sys v0.0.0-20211019181941-9d821ace8654 // indirect
+	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 )
 
 go 1.17
