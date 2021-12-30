@@ -5,6 +5,7 @@ import (
 	. "fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -42,6 +43,7 @@ const (
 	PBadgeT    = 15
 	RadioT     = 16
 	ContainerT = 17
+	FileInputT = 18
 )
 
 type Elem struct {
@@ -91,7 +93,7 @@ func (e *Elem) Callback(fn func(string, int)) {
 			http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
 				fn("", 0)
 			})
-		} else if e.elType == ITextT || e.elType == DDownT || e.elType == RSliderT || e.elType == RadioT {
+		} else if e.elType == ITextT || e.elType == DDownT || e.elType == RSliderT || e.elType == RadioT || e.elType == FileInputT {
 			http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
 				buf := make([]byte, BUFFER_SIZE)
 				inp := r.Body
@@ -102,7 +104,10 @@ func (e *Elem) Callback(fn func(string, int)) {
 					e.ChangeText(strValue)
 
 				}
-				if e.elType == ITextT || e.elType == DDownT {
+				if e.elType == ITextT || e.elType == DDownT || e.elType == FileInputT {
+					if e.elType == FileInputT {
+						strValue = filepath.Base(strValue)
+					}
 					fn(strValue, 0)
 				} else if e.elType == RSliderT || e.elType == RadioT {
 					var intValue int
@@ -603,6 +608,28 @@ func (gc *GuiCfg) GWB5RadioNew(ids []string, text []string, checkedInd int) Elem
 		var val = e.target.value;
 		xhr.send(val);
 	}`, singleId, addr)
+	return e
+}
+
+// GWB5FileInputNew allows to select a file; pass a unique identifier
+// and the lable text
+func (gc *GuiCfg) GWB5FileInputNew(id string, text string) Elem {
+	hStart := Sprintf(`
+	<div class="input-group mb-3">
+  	<button class="btn btn-outline-secondary" type="button" id="%s" onclick="%s_func()">%s</button>
+  	<input type="file" class="form-control" id="%sfile" aria-describedby="inputGroupFileAddon03" aria-label="Upload">
+    </div>`, id, id, text, id)
+
+	e := Elem{gc: gc, hStart: hStart, hEnd: "", html: hStart, id: id, elType: FileInputT, js: ""}
+	addr := Sprintf("/%s", e.id)
+	e.js = Sprintf(`
+	function %s_func(e) {
+		xhr = new XMLHttpRequest();
+		xhr.open("POST", "%s", true);
+		var val = document.getElementById("%sfile").value;
+		xhr.send(val);
+	}
+	`, e.id, addr, e.id)
 	return e
 }
 

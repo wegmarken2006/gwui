@@ -9,8 +9,6 @@ import (
 
 func main() {
 
-	//create elements
-
 	gc := gw.GuiCfg{Port: 9000, BrowserStart: true}
 	body := gc.GWB5Init("gwui test")
 	//mandatory: callback on body
@@ -18,7 +16,10 @@ func main() {
 	gc.Body = &body
 	body.SetBackgroundImage("abstract.jpg", 95)
 
-	//bt1 := gc.GWB5ButtonNew("bt1", "primary", "Change")
+	tabs := gc.GWB5TabsNew([]string{"tb1", "tb2", "tab3"}, []string{"tab1", "tab2", "tab3"})
+
+	//create first tab elements
+
 	bt1 := gc.GWB5ButtonWithIconNew("bt1", "primary", "brush", "Change")
 	lb1 := gc.GWB5LabelNew("lb1", "Change text color")
 
@@ -52,20 +53,6 @@ func main() {
 	cd1 := gc.GWB5CardNew("cd1", "Kitchen Sink", "Elements")
 	cd1.SetBackgroundColor("#eeffee")
 
-	img1 := gc.GWImageNew("img1", "abstract.jpg", 50, 50)
-	img2 := gc.GWImageNew("img2", "abstract.jpg", 100, 100)
-	img3 := gc.GWImageNew("img3", "abstract.jpg", 200, 200)
-	img4 := gc.GWImageNew("img3", "abstract.jpg", 300, 100)
-
-	rs1 := gc.GWB5RangeSliderNew("rs1", 50.0, 0.0, 100.0, 1.0)
-
-	pb1 := gc.GWB5PillBadgeNew("pb1", "danger", "50")
-
-	rd1Choices := []string{"do nothing", "abstract.jpg", "sunset.jpg"}
-	rd1 := gc.GWB5RadioNew([]string{"rd1", "rd2", "rd3"},
-		rd1Choices, 1)
-	tabs := gc.GWB5TabsNew([]string{"tb1", "tb2", "tab3"}, []string{"tab1", "tab2", "tab3"})
-
 	// callbacks
 
 	//first modal button
@@ -85,7 +72,6 @@ func main() {
 			text := Sprintf("From Input field: %s\n", strValue)
 			ta1.WriteTextArea(text)
 		}
-
 	})
 
 	dd5.Callback(func(strValue string, intValue int) {
@@ -106,16 +92,6 @@ func main() {
 	bt3.Callback(func(string, int) {
 		ta1.ChangeFontSize("large")
 		bt3.ChangeText("Changed")
-	})
-
-	rs1.Callback(func(strValue string, intValue int) {
-		pb1.ChangeText(strValue)
-	})
-
-	rd1.Callback(func(strValue string, intValue int) {
-		if intValue > 0 {
-			img4.ChangeImage(rd1Choices[intValue])
-		}
 	})
 
 	// fisrt tab
@@ -179,12 +155,42 @@ func main() {
 	tabs.SubElems[0].Add(cd1)
 
 	//Second tab
+
+	img1 := gc.GWImageNew("img1", "abstract.jpg", 50, 50)
+	img2 := gc.GWImageNew("img2", "abstract.jpg", 100, 100)
+	img3 := gc.GWImageNew("img3", "abstract.jpg", 200, 200)
+	img4 := gc.GWImageNew("img3", "abstract.jpg", 300, 100)
+
+	rs1 := gc.GWB5RangeSliderNew("rs1", 50.0, 0.0, 100.0, 1.0)
+
+	pb1 := gc.GWB5PillBadgeNew("pb1", "danger", "50")
+
+	rd1Choices := []string{"do nothing", "abstract.jpg", "sunset.jpg"}
+	rd1 := gc.GWB5RadioNew([]string{"rd1", "rd2", "rd3"},
+		rd1Choices, 1)
+
+	fi1 := gc.GWB5FileInputNew("fi1", "Open")
+	lb11 := gc.GWB5LabelNew("lb11", "No file")
+
+	rs1.Callback(func(strValue string, intValue int) {
+		pb1.ChangeText(strValue)
+	})
+
+	rd1.Callback(func(strValue string, intValue int) {
+		if intValue > 0 {
+			img4.ChangeImage(rd1Choices[intValue])
+		}
+	})
+
+	fi1.Callback(func(strValue string, intValue int) {
+		lb11.ChangeText(strValue)
+	})
+
 	//Grid: container, row(s), ...
 	ct2 := gc.GWB5ContainerNew("ct2")
 	r1t2 := gc.GWB5RowNew("r1t2")
 	c1t2 := gc.GWB5ColSpanNew("c1t2", 2)
 	c2t2 := gc.GWB5ColNew("c1t2")
-	tabs.SubElems[1].SetBackgroundColor("white")
 	c1t2.Add(rd1)
 	c2t2.Add(img1)
 	c2t2.Add(img2)
@@ -202,7 +208,13 @@ func main() {
 	r2t2.Add(c3t2)
 	r2t2.Add(c4t2)
 	ct2.Add(r2t2)
+
+	r3t2 := gc.GWB5RowNew("r3t2")
+	r3t2.Add(fi1)
+	r3t2.Add(lb11)
+	ct2.Add(r3t2)
 	tabs.SubElems[1].Add(ct2)
+	tabs.SubElems[1].SetBackgroundColor("white")
 
 	//Third tab
 	lb10.SetColor("white")
