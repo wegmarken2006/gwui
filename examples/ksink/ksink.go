@@ -16,7 +16,7 @@ func main() {
 	//mandatory: callback on body
 	body.Callback(func(string, int) {})
 	gc.Body = &body
-	body.SetBackgroundImage("abstract.jpg", 100)
+	body.SetBackgroundImage("abstract.jpg", 95)
 
 	//bt1 := gc.GWB5ButtonNew("bt1", "primary", "Change")
 	bt1 := gc.GWB5ButtonWithIconNew("bt1", "primary", "brush", "Change")
@@ -55,7 +55,7 @@ func main() {
 	img1 := gc.GWImageNew("img1", "abstract.jpg", 50, 50)
 	img2 := gc.GWImageNew("img2", "abstract.jpg", 100, 100)
 	img3 := gc.GWImageNew("img3", "abstract.jpg", 200, 200)
-	img4 := gc.GWImageNew("img3", "abstract.jpg", 300, 300)
+	img4 := gc.GWImageNew("img3", "abstract.jpg", 300, 100)
 
 	rs1 := gc.GWB5RangeSliderNew("rs1", 50.0, 0.0, 100.0, 1.0)
 
@@ -118,8 +118,11 @@ func main() {
 		}
 	})
 
-	// fisrt tab, place elements in a grid
+	// fisrt tab
+	// place elements in a grid
+	// most external must be: container, row
 
+	ct1 := gc.GWB5ContainerNew("ct1")
 	r1 := gc.GWB5RowNew("r1")
 	r11 := gc.GWB5RowNew("r11")
 	r12 := gc.GWB5RowNew("r12")
@@ -169,14 +172,17 @@ func main() {
 	r1.Add(c1)
 	r1.Add(c2)
 
-	cd1.Add(r1)
+	ct1.Add(r1) //container
+	cd1.Add(ct1)
 
 	//Fisrt tab content
 	tabs.SubElems[0].Add(cd1)
 
 	//Second tab
+	//Grid: container, row(s), ...
+	ct2 := gc.GWB5ContainerNew("ct2")
 	r1t2 := gc.GWB5RowNew("r1t2")
-	c1t2 := gc.GWB5ColSpanNew("c1t2", 4)
+	c1t2 := gc.GWB5ColSpanNew("c1t2", 2)
 	c2t2 := gc.GWB5ColNew("c1t2")
 	tabs.SubElems[1].SetBackgroundColor("white")
 	c1t2.Add(rd1)
@@ -186,12 +192,17 @@ func main() {
 	c2t2.Add(img4)
 	r1t2.Add(c1t2)
 	r1t2.Add(c2t2)
-	tabs.SubElems[1].Add(r1t2)
+	ct2.Add(r1t2)
 
-	p1 := gc.GWParagraphNew("p1")
-	p1.Add(pb1)
-	p1.Add(rs1)
-	tabs.SubElems[1].Add(p1)
+	r2t2 := gc.GWB5RowNew("r2t2")
+	c3t2 := gc.GWB5ColSpanNew("c3t2", 2)
+	c4t2 := gc.GWB5ColNew("c4t2")
+	c3t2.Add(pb1)
+	c4t2.Add(rs1)
+	r2t2.Add(c3t2)
+	r2t2.Add(c4t2)
+	ct2.Add(r2t2)
+	tabs.SubElems[1].Add(ct2)
 
 	//Third tab
 	lb10.SetColor("white")

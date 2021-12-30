@@ -41,6 +41,7 @@ const (
 	RSliderT   = 14
 	PBadgeT    = 15
 	RadioT     = 16
+	ContainerT = 17
 )
 
 type Elem struct {
@@ -432,21 +433,21 @@ func (el *Elem) SetBackgroundColor(text string) {
 // SetBackgroundImage sets an element background image.
 // The image must reside in the static/ folder.
 // Opacity is expressed as %; pass 100 for no transparency.
-func (el *Elem) SetBackgroundImage(fileName string, opacity int) {
+func (el *Elem) SetBackgroundImage(fileName string, opacityPerc int) {
 	var js string
 	if el.elType == BodyT {
 		js = Sprintf(`
 		document.body.style.backgroundImage = "url('static/%s')";	
 		document.body.style.backgroundSize = "cover";	
 		document.body.style.opacity = "%d%c";	
-		`, fileName, opacity, '%')
+		`, fileName, opacityPerc, '%')
 	} else {
 		js = Sprintf(`
 		var item = document.getElementById("%s");
 		item.style.backgroundImage = "url('%s')";		
 		item.style.backgroundSize = "cover";	
 		item.style.opacity = "%d%c";		
-		`, el.id, fileName, opacity, '%')
+		`, el.id, fileName, opacityPerc, '%')
 	}
 	el.js = el.js + js
 }
@@ -705,13 +706,24 @@ func (gc *GuiCfg) GWB5RangeSliderNew(id string, initial float32, min float32, ma
 	return e
 }
 
-// GWB5PillBadgeNew creates a pill badge, pass a unique identifier, type, text.
+// GWB5PillBadgeNew creates a pill badge, pass a unique identifier,
+// type (same as Button), text.
 func (gc *GuiCfg) GWB5PillBadgeNew(id string, bType string, text string) Elem {
 	hStart := Sprintf(`
 	<span id="%s" class="badge rounded-pill bg-%s">%s</span>
 	`, id, bType, text)
 
 	e := Elem{gc: gc, hStart: hStart, hEnd: "", html: hStart, id: id, elType: PBadgeT, js: ""}
+	return e
+}
+
+// GWB5ContainerNew creates a container, pass a unique identifier,
+func (gc *GuiCfg) GWB5ContainerNew(id string) Elem {
+	hStart := Sprintf(`
+	<div class="container" id="%s">`, id)
+	hEnd := `
+	</div>`
+	e := Elem{gc: gc, hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: ContainerT, js: ""}
 	return e
 }
 
@@ -726,7 +738,7 @@ func (gc *GuiCfg) GWB5RowNew(id string) Elem {
 }
 
 // GWB5ColSpanNew creates a col with fixed width, pass a unique identifier
-// and the span.
+// and the span (1, 2, 4, 6, 12).
 func (gc *GuiCfg) GWB5ColSpanNew(id string, span int) Elem {
 	hStart := Sprintf(`
 	<div class="col-%d align-self-center" id="%s">`, span, id)
@@ -746,7 +758,7 @@ func (gc *GuiCfg) GWB5ColNew(id string) Elem {
 	return e
 }
 
-// GWB5DropDownNew creates a button dropdown; pass the B5 button type,
+// GWB5DropDownNew creates a button dropdown; pass the type (same as button),
 // a unique identifier, the button text and the list of options.
 func (gc *GuiCfg) GWB5DropDownNew(id string, bType string, text string, list []string) Elem {
 	hText := Sprintf(`
@@ -780,7 +792,10 @@ func (gc *GuiCfg) GWB5DropDownNew(id string, bType string, text string, list []s
 	return e
 }
 
-// GWB5ButtonNew creates a button, pass the B5 type, a unique identifier, the button text.
+// GWB5ButtonNew creates a button, pass the B5 button type, a unique identifier,
+// the button text.
+// B5 button types are: "primary", "secondary", "success", "danger",
+// "warning", "info", "light", "dark".
 func (gc *GuiCfg) GWB5ButtonNew(id string, bType string, text string) Elem {
 	hText := Sprintf(`
 	<button type="button" class="btn btn-%s m-2" id="%s" onclick="%s_func()">

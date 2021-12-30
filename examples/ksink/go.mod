@@ -1,8 +1,8 @@
 module ksink
 
-//replace github.com/wegmarken2006/gwui v1.0.4 => ../../../gwui
+//replace github.com/wegmarken2006/gwui v1.0.5 => ../../../gwui
 
-require github.com/wegmarken2006/gwui v1.0.4
+require github.com/wegmarken2006/gwui v1.0.5
 
 require (
 	github.com/gorilla/websocket v1.4.2 // indirect
