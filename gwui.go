@@ -40,6 +40,7 @@ const (
 	ImageT     = 13
 	RSliderT   = 14
 	PBadgeT    = 15
+	RadioT     = 16
 )
 
 type Elem struct {
@@ -89,7 +90,7 @@ func (e *Elem) Callback(fn func(string, int)) {
 			http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
 				fn("", 0)
 			})
-		} else if e.elType == ITextT || e.elType == DDownT || e.elType == RSliderT {
+		} else if e.elType == ITextT || e.elType == DDownT || e.elType == RSliderT || e.elType == RadioT {
 			http.HandleFunc(addr, func(w http.ResponseWriter, r *http.Request) {
 				buf := make([]byte, BUFFER_SIZE)
 				inp := r.Body
@@ -102,7 +103,7 @@ func (e *Elem) Callback(fn func(string, int)) {
 				}
 				if e.elType == ITextT || e.elType == DDownT {
 					fn(strValue, 0)
-				} else if e.elType == RSliderT {
+				} else if e.elType == RSliderT || e.elType == RadioT {
 					var intValue int
 					Sscanf(strValue, "%d", &intValue)
 					fn(strValue, intValue)
@@ -356,12 +357,12 @@ func (el *Elem) WriteTextArea(text string) {
 	}
 }
 
-// ChangeText changes on the run an element text.
-func (el *Elem) ChangeImage(text string) {
+// ChangeImage changes the image element src with the fileName passed.
+func (el *Elem) ChangeImage(fileName string) {
 	gc := el.gc
 	if gc.Body.gs != nil {
 		var toSend string
-		toSend = Sprintf("IMAGE@%s@%s", el.id, text)
+		toSend = Sprintf("IMAGE@%s@%s", el.id, fileName)
 		gc.mutex.Lock()
 		defer gc.mutex.Unlock()
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
@@ -571,6 +572,39 @@ func (gc *GuiCfg) GWB5TabsNew(ids []string, texts []string) Elem {
 	tabs.subEnd = `</div>`
 	tabs.SubElems = elems
 	return tabs
+}
+
+func (gc *GuiCfg) GWB5RadioNew(ids []string, text []string, checkedInd int) Elem {
+	hStart := ""
+	checked := ""
+	singleId := ids[0] + "radio"
+	for ind, id := range ids {
+		if ind == checkedInd {
+			checked = "checked"
+		} else {
+			checked = ""
+		}
+		hStart = Sprintf(`
+		%s
+		<div class="form-check">
+		<input class="form-check-input" type="radio" value="%d" name="%s" id="%s" %s onclick="%s_func(event)">
+		<label class="form-check-label" for="%s">
+		%s
+		</label>
+	  	</div>
+		`, hStart, ind, singleId, id, checked, singleId, id, text[ind])
+	}
+
+	e := Elem{gc: gc, hStart: hStart, hEnd: "", html: hStart, id: singleId, elType: RadioT, js: ""}
+	addr := Sprintf("/%s", singleId)
+	e.js = Sprintf(`
+	function %s_func(e) {
+		xhr = new XMLHttpRequest();
+		xhr.open("POST", "%s", true);
+		var val = e.target.value;
+		xhr.send(val);
+	}`, singleId, addr)
+	return e
 }
 
 // GWParagraphNew creates a paragraph; pass a unique identifier.

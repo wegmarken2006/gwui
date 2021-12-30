@@ -55,12 +55,15 @@ func main() {
 	img1 := gc.GWImageNew("img1", "abstract.jpg", 50, 50)
 	img2 := gc.GWImageNew("img2", "abstract.jpg", 100, 100)
 	img3 := gc.GWImageNew("img3", "abstract.jpg", 200, 200)
-	img4 := gc.GWImageNew("img4", "abstract.jpg", 300, 300)
+	img4 := gc.GWImageNew("img3", "abstract.jpg", 300, 300)
 
 	rs1 := gc.GWB5RangeSliderNew("rs1", 50.0, 0.0, 100.0, 1.0)
 
 	pb1 := gc.GWB5PillBadgeNew("pb1", "danger", "50")
 
+	rd1Choices := []string{"do nothing", "abstract.jpg", "sunset.jpg"}
+	rd1 := gc.GWB5RadioNew([]string{"rd1", "rd2", "rd3"},
+		rd1Choices, 1)
 	tabs := gc.GWB5TabsNew([]string{"tb1", "tb2", "tab3"}, []string{"tab1", "tab2", "tab3"})
 
 	// callbacks
@@ -93,7 +96,6 @@ func main() {
 		ta1.ChangeColor("red")
 		bt1.ChangeText("Changed")
 		bt1.ChangeToDisable()
-		img4.ChangeImage("sunset.jpg")
 	})
 
 	bt2.Callback(func(string, int) {
@@ -110,7 +112,13 @@ func main() {
 		pb1.ChangeText(strValue)
 	})
 
-	// place elements in a grid
+	rd1.Callback(func(strValue string, intValue int) {
+		if intValue > 0 {
+			img4.ChangeImage(rd1Choices[intValue])
+		}
+	})
+
+	// fisrt tab, place elements in a grid
 
 	r1 := gc.GWB5RowNew("r1")
 	r11 := gc.GWB5RowNew("r11")
@@ -166,18 +174,21 @@ func main() {
 	//Fisrt tab content
 	tabs.SubElems[0].Add(cd1)
 
-	//Second tab content
+	//Second tab
 	tabs.SubElems[1].SetBackgroundColor("white")
+
 	tabs.SubElems[1].Add(img1)
 	tabs.SubElems[1].Add(img2)
 	tabs.SubElems[1].Add(img3)
 	tabs.SubElems[1].Add(img4)
+	tabs.SubElems[1].Add(rd1)
+
 	p1 := gc.GWParagraphNew("p1")
 	p1.Add(pb1)
 	p1.Add(rs1)
 	tabs.SubElems[1].Add(p1)
 
-	//Third tab content
+	//Third tab
 	lb10.SetColor("white")
 	tabs.SubElems[2].Add(lb10)
 
