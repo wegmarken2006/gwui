@@ -191,6 +191,7 @@ func main() {
 	r1t2 := gc.GWB5RowNew("r1t2")
 	c1t2 := gc.GWB5ColSpanNew("c1t2", 2)
 	c2t2 := gc.GWB5ColNew("c1t2")
+
 	c1t2.Add(rd1)
 	c2t2.Add(img1)
 	c2t2.Add(img2)
@@ -210,8 +211,13 @@ func main() {
 	ct2.Add(r2t2)
 
 	r3t2 := gc.GWB5RowNew("r3t2")
-	r3t2.Add(fi1)
-	r3t2.Add(lb11)
+	c5t2 := gc.GWB5ColNew("c5t2")
+	c6t2 := gc.GWB5ColSpanNew("c6t2", 2)
+
+	c5t2.Add(fi1)
+	c6t2.Add(lb11)
+	r3t2.Add(c5t2)
+	r3t2.Add(c6t2)
 	ct2.Add(r3t2)
 	tabs.SubElems[1].Add(ct2)
 	tabs.SubElems[1].SetBackgroundColor("white")

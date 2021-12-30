@@ -615,10 +615,10 @@ func (gc *GuiCfg) GWB5RadioNew(ids []string, text []string, checkedInd int) Elem
 // and the lable text
 func (gc *GuiCfg) GWB5FileInputNew(id string, text string) Elem {
 	hStart := Sprintf(`
-	<div class="input-group mb-3">
+	<div class="input-group m-2">
   	<button class="btn btn-outline-secondary" type="button" id="%s" onclick="%s_func()">%s</button>
-  	<input type="file" class="form-control" id="%sfile" aria-describedby="inputGroupFileAddon03" aria-label="Upload">
-    </div>`, id, id, text, id)
+  	<input type="file" class="form-control" id="%sfile" aria-describedby="%s" aria-label="Upload">
+    </div>`, id, id, text, id, id)
 
 	e := Elem{gc: gc, hStart: hStart, hEnd: "", html: hStart, id: id, elType: FileInputT, js: ""}
 	addr := Sprintf("/%s", e.id)
