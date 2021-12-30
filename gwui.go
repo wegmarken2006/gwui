@@ -239,10 +239,8 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
 	</head>
 
 	<body>
-	<div class="container">
 	`, title)
 	hEnd := `
-	</div>
 	</body>
 	<script type="text/javascript" src="/static/web2.js"></script>
 	
@@ -727,10 +725,21 @@ func (gc *GuiCfg) GWB5RowNew(id string) Elem {
 	return e
 }
 
+// GWB5ColSpanNew creates a col with fixed width, pass a unique identifier
+// and the span.
+func (gc *GuiCfg) GWB5ColSpanNew(id string, span int) Elem {
+	hStart := Sprintf(`
+	<div class="col-%d align-self-center" id="%s">`, span, id)
+	hEnd := `
+	</div>`
+	e := Elem{gc: gc, hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: ColT, js: ""}
+	return e
+}
+
 // GWB5ColNew creates a col, pass a unique identifier.
 func (gc *GuiCfg) GWB5ColNew(id string) Elem {
 	hStart := Sprintf(`
-	<div class="col" id="%s">`, id)
+	<div class="col align-self-center" id="%s">`, id)
 	hEnd := `
 	</div>`
 	e := Elem{gc: gc, hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: ColT, js: ""}

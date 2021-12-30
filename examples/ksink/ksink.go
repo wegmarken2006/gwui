@@ -175,13 +175,18 @@ func main() {
 	tabs.SubElems[0].Add(cd1)
 
 	//Second tab
+	r1t2 := gc.GWB5RowNew("r1t2")
+	c1t2 := gc.GWB5ColSpanNew("c1t2", 4)
+	c2t2 := gc.GWB5ColNew("c1t2")
 	tabs.SubElems[1].SetBackgroundColor("white")
-
-	tabs.SubElems[1].Add(img1)
-	tabs.SubElems[1].Add(img2)
-	tabs.SubElems[1].Add(img3)
-	tabs.SubElems[1].Add(img4)
-	tabs.SubElems[1].Add(rd1)
+	c1t2.Add(rd1)
+	c2t2.Add(img1)
+	c2t2.Add(img2)
+	c2t2.Add(img3)
+	c2t2.Add(img4)
+	r1t2.Add(c1t2)
+	r1t2.Add(c2t2)
+	tabs.SubElems[1].Add(r1t2)
 
 	p1 := gc.GWParagraphNew("p1")
 	p1.Add(pb1)
