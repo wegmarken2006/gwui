@@ -6,3 +6,7 @@ examples/minimal/mini.exe
 examples/minimal/go.sum
 examples/minimal/static/index.html
 examples/minimal/static/web2.js
+examples/minimal-astilectron/mini.exe
+examples/minimal-astilectron/go.sum
+examples/minimal-astilectron/static/index.html
+examples/minimal-astilectron/static/web2.js

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	. "fmt"
 	"log"
 
@@ -46,7 +45,7 @@ func main() {
 		BaseDirectoryPath: "static",
 	})
 	if err != nil {
-		l.Fatal(fmt.Errorf("main: creating astilectron failed: %w", err))
+		l.Fatal(Errorf("main: creating astilectron failed: %w", err))
 	}
 	defer a.Close()
 
