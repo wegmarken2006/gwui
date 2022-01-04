@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	gc := gw.GuiCfg{BrowserStart: true}
+	gc := gw.GuiCfg{BrowserStart: true, PlotIncluded: true}
 	body := gc.GWB5Init("gwui test")
 	//mandatory: callback on body
 	body.Callback(func(string, int) {})
@@ -223,8 +223,15 @@ func main() {
 	tabs.SubElems[1].SetBackgroundColor("white")
 
 	//Third tab
+
+	x2 := []int{1, 2, 3, 4, 5}
+	y2 := []int{1, 2, 4, 8, 16}
+	pl1 := gc.GWPlyPlotLine("pl1", x2, y2)
+	pl2 := gc.GWPlyPlotScatter("pl2", x2, y2)
 	lb10.SetColor("white")
 	tabs.SubElems[2].Add(lb10)
+	tabs.SubElems[2].Add(pl1)
+	tabs.SubElems[2].Add(pl2)
 
 	//final body additions; add modal to body directly
 	body.Add(tabs)

@@ -45,6 +45,7 @@ const (
 	RadioT     = 16
 	ContainerT = 17
 	FileInputT = 18
+	PlotT      = 19
 )
 
 type Elem struct {
@@ -69,6 +70,7 @@ type GuiCfg struct {
 	Body         *Elem
 	ServeURL     string
 	BrowserStart bool
+	PlotIncluded bool
 }
 
 func (e *Elem) Add(n Elem) {
@@ -240,11 +242,18 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
 
 	<body>
 	`, title)
-	hEnd := `
+
+	plotScript := ""
+	if gc.PlotIncluded {
+		plotScript = `<script type="text/javascript" src="/static/plotly/plotly-2.8.3.min.js"></script> `
+	}
+	hEnd := Sprintf(`
 	</body>
+
+	%s
 	<script type="text/javascript" src="/static/web2.js"></script>
-	
-	</html>`
+	</html>`, plotScript)
+
 	e := Elem{gc: gc, hStart: hStart, hEnd: hEnd, html: hStart, id: "body", elType: BodyT}
 
 	addr := Sprintf("/%s", e.id)
