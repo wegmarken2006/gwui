@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	gc := gw.GuiCfg{Port: 9000, BrowserStart: true}
+	gc := gw.GuiCfg{BrowserStart: true}
 	body := gc.GWB5Init("gwui test")
 	//mandatory: callback on body
 	body.Callback(func(string, int) {})

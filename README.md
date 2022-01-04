@@ -1,11 +1,11 @@
 # gwui
 ## UI library based on [Bootstrap 5.1.3](https://getbootstrap.com/) and [Bootstrap Icons 1.7.2](https://icons.getbootstrap.com/).
-### UI is served on http://localhost, then the default browser can be automatically launched.
-### HTTP POST used for UI -> logic messages.
-### Websockets used for logic -> UI messages. 
-### Intended for personal utility tools.
+UI is served on http://localhost, then the default browser can be automatically launched.
+HTTP POST used for UI -> logic messages.
+Websockets used for logic -> UI messages. 
+Intended for personal utility tools.
 
-### Still  under development.
+Still  under development.
 ###
 ### App folder structure:
 ```
@@ -17,9 +17,9 @@
 |    |----bootstrap
 |    |----bootstrap-icons
 ```
-### Copy the static folder from the [examples](./examples) here.
-### Optionally, use web2.css for further customizations.
-###
+Copy the static folder from the [examples](./examples) here.
+Optionally, use web2.css for further customizations.
+
 ### To compile the examples:
 ```
 cd example\ksink
@@ -38,7 +38,7 @@ import (
 )
 
 func main() {
-	gc := gw.GuiCfg{Port: 9000, BrowserStart: true}
+	gc := gw.GuiCfg{BrowserStart: true}
 	body := gc.GWB5Init("mini")
 
 	//mandatory: callback on body

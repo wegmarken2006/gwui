@@ -3,6 +3,7 @@ package gwui
 import (
 	"bufio"
 	. "fmt"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -66,7 +67,7 @@ type GuiCfg struct {
 	fcss         fp.File
 	mutex        sync.Mutex
 	Body         *Elem
-	Port         int
+	ServeURL     string
 	BrowserStart bool
 }
 
@@ -134,29 +135,22 @@ func (e *Elem) Callback(fn func(string, int)) {
 // GWRun starts the server and launches the browser.
 func (gc *GuiCfg) GWRun() {
 	const TRIES int = 5
-	var serveURL string
-	go func() {
-		for ind := 0; ind < TRIES; ind++ {
-			portStr := Sprintf(":%d", gc.Port)
-			serveURL = Sprintf("http://localhost:%d", gc.Port)
-			text := Sprintf("Serving on %s", serveURL)
-			Println(text)
-			err := http.ListenAndServe(portStr, nil)
-			if err != nil {
-				Println("Port busy, try another")
-				gc.Port += 1
-			} else {
-				return
-			}
-		}
-		Println("Something went wrong with the server")
-	}()
+	listener, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		Println(err)
+		os.Exit(0)
+	}
+
+	go http.Serve(listener, nil)
+	gc.ServeURL = Sprintf("http://%s", listener.Addr())
+	text := Sprintf("Serving on %s", gc.ServeURL)
+	Println(text)
 
 	if gc.BrowserStart {
 		go func() {
 			ind := 0
 			for {
-				if serveURL == "" {
+				if gc.ServeURL == "" {
 					timeD := time.Duration(500) * time.Millisecond
 					time.Sleep(timeD)
 					continue
@@ -164,11 +158,11 @@ func (gc *GuiCfg) GWRun() {
 				if ind >= TRIES {
 					break
 				}
-				errb := browser.OpenURL(serveURL)
+				errb := browser.OpenURL(gc.ServeURL)
 				if errb != nil {
 					Println("Wrong URL")
 				} else {
-					text := Sprintf("Launching browser with %s ...", serveURL)
+					text := Sprintf("Launching browser with %s ...", gc.ServeURL)
 					Println(text)
 					Println(" You may need to disable adblocker on localhost")
 					return
