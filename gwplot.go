@@ -143,10 +143,13 @@ func (gc *GuiCfg) GWPlyPlotScatter(id string, x []float64, y []float64, title st
 	return gc.plyPlotNumNum(id, x, y, "scatter", "markers", title, xTitle, yTitle, width, height)
 }
 
-func (gc *GuiCfg) GWPlyPlotRedraw(el Elem, x []int, y []int) {
+func (gc *GuiCfg) GWPlyPlotRedrawY(el Elem, y []float64) {
 	//Plotly.newPlot(element,charData,layout);
 	if gc.Body.gs != nil {
-		toSend := Sprintf("PREDRAW@%s", el.id)
+		toSend := Sprintf("PREDRAWY@%s@%d", el.id, len(y))
+		for _, yElem := range y {
+			toSend = Sprintf("%s@%7.2f", toSend, yElem)
+		}
 		gc.mutex.Lock()
 		defer gc.mutex.Unlock()
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))

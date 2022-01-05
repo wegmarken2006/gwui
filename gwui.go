@@ -74,6 +74,7 @@ type GuiCfg struct {
 }
 
 func (e *Elem) Add(n Elem) {
+
 	e.html = e.html + n.html + n.hEnd
 	e.js = e.js + n.js
 
@@ -300,9 +301,18 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
 		}
 		else if (type === "IMAGE") {
 			src = 'static/' + messages[2]; 
-			item.src = src
+			item.src = src;
 		}
-		
+		else if (type === "PREDRAWY") {
+			var len = messages[2];
+			var yVec = new Float32Array(len);
+			for (ind = 0; ind < len; ind++) {
+				yVec[ind] = parseFloat(messages[3+ind]);
+			}
+			window["data" + id][0].y = yVec;
+			Plotly.newPlot(window["PLOT"+id], window["data"+id], window["layout"+id]);
+		}
+
 	};
 	`, addr, e.id, e.id)
 
