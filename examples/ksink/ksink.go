@@ -225,13 +225,41 @@ func main() {
 	//Third tab
 
 	x2 := []int{1, 2, 3, 4, 5}
-	y2 := []int{1, 2, 4, 8, 16}
-	pl1 := gc.GWPlyPlotLine("pl1", x2, y2)
-	pl2 := gc.GWPlyPlotScatter("pl2", x2, y2)
-	lb10.SetColor("white")
-	tabs.SubElems[2].Add(lb10)
-	tabs.SubElems[2].Add(pl1)
-	tabs.SubElems[2].Add(pl2)
+	xs2 := []string{"aa", "bb", "cc", "dd", "ee"}
+	ys2 := []string{"aa", "bb", "cc", "dd", "ee"}
+	y2Original := []int{1, 2, 4, 8, 16}
+	y2 := y2Original
+	pl1 := gc.GWPlyPlotLine("pl1", x2, y2, "chart1", "xaxis", "yaxis", 300, 250)
+	pl2 := gc.GWPlyPlotScatter("pl2", x2, y2, "chart2", "xaxis", "yaxis", 300, 250)
+	pl3 := gc.GWPlyPlotVBar("pl3", xs2, y2, "chart3", "xaxis", "yaxis", 300, 250)
+	pl4 := gc.GWPlyPlotHBar("pl4", y2Original, ys2, "chart4", "xaxis", "yaxis", 300, 250)
+	rs2 := gc.GWB5RangeSliderNew("rs2", 1.0, 1.0, 100.0, 1.0)
+	rs2.Callback(func(strValue string, intValue int) {
+		for ind, yElem := range y2 {
+			y2[ind] = yElem * intValue
+
+		}
+	})
+
+	ct3 := gc.GWB5ContainerNew("ct3")
+	r1t3 := gc.GWB5RowNew("r1t3")
+	//r2t3 := gc.GWB5RowNew("r2t3")
+	c1t3 := gc.GWB5ColSpanNew("c1t3", 2)
+	c2t3 := gc.GWB5ColNew("c1t3")
+	c3t3 := gc.GWB5ColNew("c1t3")
+	c1t3.Add(lb10)
+	c2t3.Add(pl1)
+	c2t3.Add(pl2)
+	c2t3.Add(rs2)
+	c3t3.Add(pl3)
+	c3t3.Add(pl4)
+	r1t3.Add(c1t3)
+	r1t3.Add(c2t3)
+	r1t3.Add(c3t3)
+	ct3.Add(r1t3)
+
+	tabs.SubElems[2].Add(ct3)
+	tabs.SubElems[2].SetBackgroundColor("white")
 
 	//final body additions; add modal to body directly
 	body.Add(tabs)
