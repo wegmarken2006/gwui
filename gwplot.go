@@ -2,6 +2,8 @@ package gwui
 
 import (
 	. "fmt"
+
+	"github.com/gorilla/websocket"
 )
 
 func (gc *GuiCfg) GWPlyDemoPlot(id string) Elem {
@@ -19,13 +21,13 @@ func (gc *GuiCfg) GWPlyDemoPlot(id string) Elem {
 	return e
 }
 
-func (gc *GuiCfg) plyPlotIntStr(id string, xVec []int, yVec []string,
+func (gc *GuiCfg) plyPlotNumStr(id string, xVec []float64, yVec []string,
 	pType string, mode string, title string, xTitle string, yTitle string,
 	width int, height int) Elem {
 	xStr := "["
 	yStr := "["
 	for ind, xElem := range xVec {
-		xStr = Sprintf(`%s%d, `, xStr, xElem)
+		xStr = Sprintf(`%s%7.2f, `, xStr, xElem)
 		yStr = Sprintf(`%s"%s", `, yStr, yVec[ind])
 	}
 	xStr = xStr + "]"
@@ -55,14 +57,14 @@ func (gc *GuiCfg) plyPlotIntStr(id string, xVec []int, yVec []string,
 	return e
 }
 
-func (gc *GuiCfg) plyPlotStrInt(id string, xVec []string, yVec []int,
+func (gc *GuiCfg) plyPlotStrNum(id string, xVec []string, yVec []float64,
 	pType string, mode string, title string, xTitle string, yTitle string,
 	width int, height int) Elem {
 	xStr := "["
 	yStr := "["
 	for ind, xElem := range xVec {
 		xStr = Sprintf(`%s"%s", `, xStr, xElem)
-		yStr = Sprintf(`%s%d, `, yStr, yVec[ind])
+		yStr = Sprintf(`%s%7.2f, `, yStr, yVec[ind])
 	}
 	xStr = xStr + "]"
 	yStr = yStr + "]"
@@ -90,14 +92,14 @@ func (gc *GuiCfg) plyPlotStrInt(id string, xVec []string, yVec []int,
 	return e
 }
 
-func (gc *GuiCfg) plyPlotIntInt(id string, xVec []int, yVec []int,
+func (gc *GuiCfg) plyPlotNumNum(id string, xVec []float64, yVec []float64,
 	pType string, mode string, title string, xTitle string, yTitle string,
 	width int, height int) Elem {
 	xStr := "["
 	yStr := "["
 	for ind, xElem := range xVec {
-		xStr = Sprintf("%s%d, ", xStr, xElem)
-		yStr = Sprintf("%s%d, ", yStr, yVec[ind])
+		xStr = Sprintf("%s%7.2f, ", xStr, xElem)
+		yStr = Sprintf("%s%7.2f, ", yStr, yVec[ind])
 	}
 	xStr = xStr + "]"
 	yStr = yStr + "]"
@@ -125,22 +127,30 @@ func (gc *GuiCfg) plyPlotIntInt(id string, xVec []int, yVec []int,
 	return e
 }
 
-func (gc *GuiCfg) GWPlyPlotVBar(id string, x []string, y []int, title string, xTitle string, yTitle string, width int, height int) Elem {
-	return gc.plyPlotStrInt(id, x, y, "bar", "s", title, xTitle, yTitle, width, height)
+func (gc *GuiCfg) GWPlyPlotVBar(id string, x []string, y []float64, title string, xTitle string, yTitle string, width int, height int) Elem {
+	return gc.plyPlotStrNum(id, x, y, "bar", "s", title, xTitle, yTitle, width, height)
 }
 
-func (gc *GuiCfg) GWPlyPlotHBar(id string, x []int, y []string, title string, xTitle string, yTitle string, width int, height int) Elem {
-	return gc.plyPlotIntStr(id, x, y, "bar", "s", title, xTitle, yTitle, width, height)
+func (gc *GuiCfg) GWPlyPlotHBar(id string, x []float64, y []string, title string, xTitle string, yTitle string, width int, height int) Elem {
+	return gc.plyPlotNumStr(id, x, y, "bar", "s", title, xTitle, yTitle, width, height)
 }
 
-func (gc *GuiCfg) GWPlyPlotLine(id string, x []int, y []int, title string, xTitle string, yTitle string, width int, height int) Elem {
-	return gc.plyPlotIntInt(id, x, y, "", "lines", title, xTitle, yTitle, width, height)
+func (gc *GuiCfg) GWPlyPlotLine(id string, x []float64, y []float64, title string, xTitle string, yTitle string, width int, height int) Elem {
+	return gc.plyPlotNumNum(id, x, y, "", "lines", title, xTitle, yTitle, width, height)
 }
 
-func (gc *GuiCfg) GWPlyPlotScatter(id string, x []int, y []int, title string, xTitle string, yTitle string, width int, height int) Elem {
-	return gc.plyPlotIntInt(id, x, y, "scatter", "markers", title, xTitle, yTitle, width, height)
+func (gc *GuiCfg) GWPlyPlotScatter(id string, x []float64, y []float64, title string, xTitle string, yTitle string, width int, height int) Elem {
+	return gc.plyPlotNumNum(id, x, y, "scatter", "markers", title, xTitle, yTitle, width, height)
 }
 
 func (gc *GuiCfg) GWPlyPlotRedraw(el Elem, x []int, y []int) {
 	//Plotly.newPlot(element,charData,layout);
+	if gc.Body.gs != nil {
+		toSend := Sprintf("PREDRAW@%s", el.id)
+		gc.mutex.Lock()
+		defer gc.mutex.Unlock()
+		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
+	} else {
+		Println("Failed Redraw, Set", gc.Body.id, "Callback!")
+	}
 }

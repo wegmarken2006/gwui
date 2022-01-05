@@ -224,10 +224,10 @@ func main() {
 
 	//Third tab
 
-	x2 := []int{1, 2, 3, 4, 5}
+	x2 := []float64{1.0, 2.0, 3.0, 4.0, 5.0}
 	xs2 := []string{"aa", "bb", "cc", "dd", "ee"}
 	ys2 := []string{"aa", "bb", "cc", "dd", "ee"}
-	y2Original := []int{1, 2, 4, 8, 16}
+	y2Original := []float64{1.0, 2.0, 4.0, 8.0, 16.0}
 	y2 := y2Original
 	pl1 := gc.GWPlyPlotLine("pl1", x2, y2, "chart1", "xaxis", "yaxis", 300, 250)
 	pl2 := gc.GWPlyPlotScatter("pl2", x2, y2, "chart2", "xaxis", "yaxis", 300, 250)
@@ -236,7 +236,7 @@ func main() {
 	rs2 := gc.GWB5RangeSliderNew("rs2", 1.0, 1.0, 100.0, 1.0)
 	rs2.Callback(func(strValue string, intValue int) {
 		for ind, yElem := range y2 {
-			y2[ind] = yElem * intValue
+			y2[ind] = yElem * float64(intValue)
 
 		}
 	})
