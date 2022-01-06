@@ -11,9 +11,6 @@ func main() {
 
 	gc := gwui.GuiCfg{BrowserStart: true, PlotIncluded: true}
 	body := gc.Init("gwui test")
-	//mandatory: callback on body
-	body.Callback(func(string, int) {})
-	gc.Body = &body
 	body.SetBackgroundImage("abstract.jpg", 95)
 
 	tabs := gc.TabsNew([]string{"tab1", "tab2", "tab3"})
@@ -42,7 +39,7 @@ func main() {
 	md1 := gc.ModalNew("TEXT INPUT", "Are you sure", "yes", "no")
 
 	ta1 := gc.TextAreaNew(12)
-	//mandatory: callback on textarea
+	//mandatory: callback on textarea to handle incoming messages
 	ta1.Callback(func(string, int) {})
 
 	ta1.SetBackgroundColor("#ffe6e6")

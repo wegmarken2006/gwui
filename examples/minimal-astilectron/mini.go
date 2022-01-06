@@ -13,10 +13,6 @@ func main() {
 	gc := gwui.GuiCfg{BrowserStart: false}
 	body := gc.Init("mini")
 
-	//mandatory: callback on body
-	body.Callback(func(string, int) {})
-	gc.Body = &body
-
 	bt1 := gc.ButtonNew("primary", "Count")
 	lb1 := gc.LabelNew("0")
 

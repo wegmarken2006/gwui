@@ -60,6 +60,7 @@ type Elem struct {
 	subStart  string
 	subEnd    string
 	ChanBool1 chan bool
+	callback  bool
 	gc        *GuiCfg
 }
 type GuiCfg struct {
@@ -92,6 +93,11 @@ func (e *Elem) Add(n Elem) {
 // It passes a string or a int value to the user function, depending on what
 // is received from a POST
 func (e *Elem) Callback(fn func(string, int)) {
+	if e.callback {
+		Println("Callback already attached to elem", e.id, "type", e.elType)
+		return
+	}
+	e.callback = true
 	go func() {
 		addr := Sprintf("/%s", e.id)
 		if e.elType == ButtonT {
@@ -324,6 +330,10 @@ func (gc *GuiCfg) Init(title string) Elem {
 
 	};
 	`, addr, e.id, e.id)
+
+	//attach a callback to body to handle logic -> gui messages
+	e.Callback(func(string, int) {})
+	gc.Body = &e
 
 	return e
 }
