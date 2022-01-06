@@ -1,5 +1,5 @@
 # gwui
-## UI library based on [Bootstrap 5.1.3](https://getbootstrap.com/) and [Bootstrap Icons 1.7.2](https://icons.getbootstrap.com/).
+UI library based on [Bootstrap 5.1.3](https://getbootstrap.com/) and [Bootstrap Icons 1.7.2](https://icons.getbootstrap.com/).
 Some charts are suppported based on [plotly 2.8.3](https://plotly.com/javascript/getting-started/)
 UI is served on http://localhost, then the default browser can be automatically launched.
 HTTP POST used for UI -> logic messages.
