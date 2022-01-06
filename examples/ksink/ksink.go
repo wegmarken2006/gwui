@@ -34,8 +34,6 @@ func main() {
 	dd5 := gc.DropDownNew("warning",
 		"Font Family", []string{"arial", "verdana", "monospace"})
 
-	lb10 := gc.LabelNew("Another tab")
-
 	md1 := gc.ModalNew("TEXT INPUT", "Are you sure", "yes", "no")
 
 	ta1 := gc.TextAreaNew(12)
@@ -225,29 +223,43 @@ func main() {
 	ys2 := xs2
 	y2Original := []float64{1.0, 2.0, 4.0, 8.0, 16.0}
 	y2 := []float64{1.0, 2.0, 4.0, 8.0, 16.0}
-	pl1 := gc.PlotLine(x2, y2, "chart1", "xaxis", "yaxis", 300, 250)
-	pl2 := gc.PlotScatter(x2, y2, "chart2", "xaxis", "yaxis", 300, 250)
-	pl3 := gc.PlotVBar(xs2, y2, "chart3", "xaxis", "yaxis", 300, 250)
-	pl4 := gc.PlotHBar(y2Original, ys2, "chart4", "xaxis", "yaxis", 300, 250)
+	ym2 := [][]float64{{1.0, 2.0, 4.0, 8.0, 16.0},
+		{2.0, 4.0, 8.0, 16.0, 18.0},
+		{5.0, 8.0, 16.0, 18.0, 19.0},
+	}
+
+	pl1 := gc.PlotLine(x2, y2, "Line", "xaxis", "yaxis", 250, 250)
+	pl2 := gc.PlotScatter(x2, y2, "Scatter", "xaxis", "yaxis", 250, 250)
+	pl3 := gc.PlotVBar(xs2, y2, "VBar", "xaxis", "yaxis", 250, 250)
+	pl4 := gc.PlotHBar(y2Original, ys2, "HBar", "xaxis", "yaxis", 250, 250)
+	pl5 := gc.PlotLineMultiY(x2, ym2, "Multi",
+		[]string{"traceA", "tB", "tC"}, "xaxis", "yaxis", 250, 250)
+	pl6 := gc.PlotBoxplot(ym2, "Boxplot",
+		[]string{"setA", "sB", "sC"}, "yaxis", 250, 250)
+
 	rs2 := gc.RangeSliderNew(1.0, 1.0, 100.0, 1.0)
+
 	rs2.Callback(func(strValue string, intValue int) {
 		for ind, yElem := range y2Original {
 			y2[ind] = yElem + float64(intValue)
 			gc.PlotRedrawY(pl1, y2)
+			gc.PlotRedrawY(pl2, y2)
+			gc.PlotRedrawY(pl3, y2)
 		}
 	})
 
 	ct3 := gc.ContainerNew()
 	r1t3 := gc.RowNew()
-	c1t3 := gc.ColSpanNew(2)
+	c1t3 := gc.ColNew()
 	c2t3 := gc.ColNew()
 	c3t3 := gc.ColNew()
-	c1t3.Add(lb10)
-	c2t3.Add(pl1)
-	c2t3.Add(pl2)
-	c2t3.Add(rs2)
-	c3t3.Add(pl3)
-	c3t3.Add(pl4)
+	c1t3.Add(pl1)
+	c1t3.Add(pl2)
+	c1t3.Add(rs2)
+	c2t3.Add(pl3)
+	c2t3.Add(pl4)
+	c3t3.Add(pl5)
+	c3t3.Add(pl6)
 	r1t3.Add(c1t3)
 	r1t3.Add(c2t3)
 	r1t3.Add(c3t3)
