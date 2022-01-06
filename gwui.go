@@ -67,6 +67,7 @@ type GuiCfg struct {
 	fjs          fp.File
 	fcss         fp.File
 	mutex        sync.Mutex
+	idCnt        int
 	Body         *Elem
 	ServeURL     string
 	BrowserStart bool
@@ -135,8 +136,15 @@ func (e *Elem) Callback(fn func(string, int)) {
 	}()
 }
 
-// GWRun starts the server and launches the browser.
-func (gc *GuiCfg) GWRun() {
+// idNew generates a unique id
+func (gc *GuiCfg) idNew() string {
+	gc.idCnt++
+	idStr := Sprintf("ID%d", gc.idCnt)
+	return idStr
+}
+
+// Run starts the server and launches the browser.
+func (gc *GuiCfg) Run() {
 	const TRIES int = 5
 	listener, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
@@ -177,9 +185,9 @@ func (gc *GuiCfg) GWRun() {
 	}
 }
 
-// GWClose writes and closes web2.html and web2.js, where the
+// Close writes and closes web2.html and web2.js, where the
 // UI is implemented.
-func (gc *GuiCfg) GWClose(body Elem) {
+func (gc *GuiCfg) Close(body Elem) {
 
 	gc.fh.Write([]byte(body.html))
 	gc.fh.Write([]byte(body.hEnd))
@@ -194,7 +202,7 @@ func (gc *GuiCfg) GWClose(body Elem) {
 
 }
 
-func (gc *GuiCfg) GWWaitKeyFromCOnsole() {
+func (gc *GuiCfg) WaitKeyFromCOnsole() {
 	//Wait for a key press
 	reader := bufio.NewReader(os.Stdin)
 	Println("Press:\n q<Enter> to exit")
@@ -209,9 +217,10 @@ func (gc *GuiCfg) GWWaitKeyFromCOnsole() {
 	}
 }
 
-// GWB5Init creates web2.html and wen2.js files and returns the Body element.
-func (gc *GuiCfg) GWB5Init(title string) Elem {
+// Init creates web2.html and wen2.js files and returns the Body element.
+func (gc *GuiCfg) Init(title string) Elem {
 
+	gc.idCnt = 0 //unique id counter
 	if _, err := os.Stat("./static"); os.IsNotExist(err) {
 		Println("Folder ./static missing.")
 		Println("Make ./static folder and copy bootstrap inside.")
@@ -319,7 +328,7 @@ func (gc *GuiCfg) GWB5Init(title string) Elem {
 	return e
 }
 
-func (el *Elem) B5ModalShow() {
+func (el *Elem) ModalShow() {
 	gc := el.gc
 	if el.elType == ModalT && gc.Body.gs != nil {
 		toSend := Sprintf("MODALSHOW@%s@%s", el.id, "dummy")
@@ -541,9 +550,13 @@ func (el *Elem) ChangeFontSize(text string) {
 	}
 }
 
-// GWB5TabsNew creates a nav-tabs; pass a vector of unique ids;
-// pass a vector of tab texts; contained tabs are returned as SubElems.
-func (gc *GuiCfg) GWB5TabsNew(ids []string, texts []string) Elem {
+// TabsNew creates a nav-tabs;  pass a vector of tab texts;
+// contained tabs are returned as SubElems.
+func (gc *GuiCfg) TabsNew(texts []string) Elem {
+	var ids []string
+	for i := 0; i < len(texts); i++ {
+		ids = append(ids, gc.idNew())
+	}
 	var elems []Elem
 	hText := `
 	<ul class="nav nav-tabs">
@@ -591,7 +604,11 @@ func (gc *GuiCfg) GWB5TabsNew(ids []string, texts []string) Elem {
 	return tabs
 }
 
-func (gc *GuiCfg) GWB5RadioNew(ids []string, text []string, checkedInd int) Elem {
+func (gc *GuiCfg) RadioNew(text []string, checkedInd int) Elem {
+	var ids []string
+	for i := 0; i < len(text); i++ {
+		ids = append(ids, gc.idNew())
+	}
 	hStart := ""
 	checked := ""
 	singleId := ids[0] + "radio"
@@ -624,9 +641,9 @@ func (gc *GuiCfg) GWB5RadioNew(ids []string, text []string, checkedInd int) Elem
 	return e
 }
 
-// GWB5FileInputNew allows to select a file; pass a unique identifier
-// and the lable text
-func (gc *GuiCfg) GWB5FileInputNew(id string, text string) Elem {
+// FileInputNew allows to select a file; pass the label text
+func (gc *GuiCfg) FileInputNew(text string) Elem {
+	id := gc.idNew()
 	hStart := Sprintf(`
 	<div class="input-group m-2">
   	<button class="btn btn-outline-secondary" type="button" id="%s" onclick="%s_func()">%s</button>
@@ -646,8 +663,9 @@ func (gc *GuiCfg) GWB5FileInputNew(id string, text string) Elem {
 	return e
 }
 
-// GWParagraphNew creates a paragraph; pass a unique identifier.
-func (gc *GuiCfg) GWParagraphNew(id string) Elem {
+// GWParagraphNew creates a paragraph.
+func (gc *GuiCfg) GWParagraphNew() Elem {
+	id := gc.idNew()
 	hStart := Sprintf(`
 	<p id="%s">`, id)
 	hEnd := `
@@ -656,9 +674,10 @@ func (gc *GuiCfg) GWParagraphNew(id string) Elem {
 	return e
 }
 
-// GWParagraphNew creates an image tag; pass a unique identifier,
-// the name of the image file, the size. The image file must reside in /static
-func (gc *GuiCfg) GWImageNew(id string, fileName string, width int, height int) Elem {
+// GWParagraphNew creates an image tag; pass  the name of the image file,
+// the size. The image file must reside in /static
+func (gc *GuiCfg) ImageNew(fileName string, width int, height int) Elem {
+	id := gc.idNew()
 	hStart := Sprintf(`
 	<img id="%s" src="static/%s" alt="missing img" width="%d" height="%d">
 	`, id, fileName, width, height)
@@ -666,10 +685,11 @@ func (gc *GuiCfg) GWImageNew(id string, fileName string, width int, height int) 
 	return e
 }
 
-// GWB5ModalNew creates a Modal Dialog; pass 2 unique identifiers for the buttons
+// ModalNew creates a Modal Dialog; pass the dialog
 // title and general text, button texts.
-func (gc *GuiCfg) GWB5ModalNew(id1 string, id2 string,
-	title string, text string, bt1Text string, bt2Text string) Elem {
+func (gc *GuiCfg) ModalNew(title string, text string, bt1Text string, bt2Text string) Elem {
+	id1 := gc.idNew()
+	id2 := gc.idNew()
 	hStart := Sprintf(`
 	<div class="modal" tabindex="-1" id="%s%s">
 	<div class="modal-dialog">
@@ -712,8 +732,9 @@ func (gc *GuiCfg) GWB5ModalNew(id1 string, id2 string,
 	return e
 }
 
-// GWB5CardNew creates a card; pass a unique identifier, header and title text.
-func (gc *GuiCfg) GWB5CardNew(id string, header string, title string) Elem {
+// CardNew creates a card; pass header and title text.
+func (gc *GuiCfg) CardNew(header string, title string) Elem {
+	id := gc.idNew()
 	hStart := Sprintf(`
 	<div class="card">
 	<h5 class="card-header">%s</h5>
@@ -726,8 +747,9 @@ func (gc *GuiCfg) GWB5CardNew(id string, header string, title string) Elem {
 	return e
 }
 
-// GWB5RangeSliderNew creates a slider, pass a unique identifier, initial, min, max, step values.
-func (gc *GuiCfg) GWB5RangeSliderNew(id string, initial float32, min float32, max float32, step float32) Elem {
+// RangeSliderNew creates a slider, pass initial, min, max, step values.
+func (gc *GuiCfg) RangeSliderNew(initial float32, min float32, max float32, step float32) Elem {
+	id := gc.idNew()
 	hStart := Sprintf(`
 	<input id="%s" type="range" class="form-range" min="%f" max="%f" step="%f" onchange="%s_func()">
 	`, id, min, max, step, id)
@@ -746,9 +768,10 @@ func (gc *GuiCfg) GWB5RangeSliderNew(id string, initial float32, min float32, ma
 	return e
 }
 
-// GWB5PillBadgeNew creates a pill badge, pass a unique identifier,
-// type (same as Button), text.
-func (gc *GuiCfg) GWB5PillBadgeNew(id string, bType string, text string) Elem {
+// PillBadgeNew creates a pill badge, pass the
+// type (same as Button), the text.
+func (gc *GuiCfg) PillBadgeNew(bType string, text string) Elem {
+	id := gc.idNew()
 	hStart := Sprintf(`
 	<span id="%s" class="badge rounded-pill bg-%s">%s</span>
 	`, id, bType, text)
@@ -757,8 +780,9 @@ func (gc *GuiCfg) GWB5PillBadgeNew(id string, bType string, text string) Elem {
 	return e
 }
 
-// GWB5ContainerNew creates a container, pass a unique identifier,
-func (gc *GuiCfg) GWB5ContainerNew(id string) Elem {
+// ContainerNew creates a container.
+func (gc *GuiCfg) ContainerNew() Elem {
+	id := gc.idNew()
 	hStart := Sprintf(`
 	<div class="container" id="%s">`, id)
 	hEnd := `
@@ -767,8 +791,9 @@ func (gc *GuiCfg) GWB5ContainerNew(id string) Elem {
 	return e
 }
 
-// GWB5RowNew creates a row, pass a unique identifier.
-func (gc *GuiCfg) GWB5RowNew(id string) Elem {
+// RowNew creates a row.
+func (gc *GuiCfg) RowNew() Elem {
+	id := gc.idNew()
 	hStart := Sprintf(`
 	<div class="row" id="%s">`, id)
 	hEnd := `
@@ -777,9 +802,9 @@ func (gc *GuiCfg) GWB5RowNew(id string) Elem {
 	return e
 }
 
-// GWB5ColSpanNew creates a col with fixed width, pass a unique identifier
-// and the span (1, 2, 4, 6, 12).
-func (gc *GuiCfg) GWB5ColSpanNew(id string, span int) Elem {
+// ColSpanNew creates a col with fixed width, pass the span (1, 2, 4, 6, 12).
+func (gc *GuiCfg) ColSpanNew(span int) Elem {
+	id := gc.idNew()
 	hStart := Sprintf(`
 	<div class="col-%d align-self-center" id="%s">`, span, id)
 	hEnd := `
@@ -788,8 +813,9 @@ func (gc *GuiCfg) GWB5ColSpanNew(id string, span int) Elem {
 	return e
 }
 
-// GWB5ColNew creates a col, pass a unique identifier.
-func (gc *GuiCfg) GWB5ColNew(id string) Elem {
+// ColNew creates a col.
+func (gc *GuiCfg) ColNew() Elem {
+	id := gc.idNew()
 	hStart := Sprintf(`
 	<div class="col align-self-center" id="%s">`, id)
 	hEnd := `
@@ -798,9 +824,10 @@ func (gc *GuiCfg) GWB5ColNew(id string) Elem {
 	return e
 }
 
-// GWB5DropDownNew creates a button dropdown; pass the type (same as button),
-// a unique identifier, the button text and the list of options.
-func (gc *GuiCfg) GWB5DropDownNew(id string, bType string, text string, list []string) Elem {
+// DropDownNew creates a button dropdown; pass the type (same as button),
+// the button text and the list of options.
+func (gc *GuiCfg) DropDownNew(bType string, text string, list []string) Elem {
+	id := gc.idNew()
 	hText := Sprintf(`
 	<div class="dropdown">
   	<button class="btn-%s m-2 dropdown-toggle" type="button" id="%s" data-bs-toggle="dropdown" aria-expanded="false" >
@@ -832,11 +859,12 @@ func (gc *GuiCfg) GWB5DropDownNew(id string, bType string, text string, list []s
 	return e
 }
 
-// GWB5ButtonNew creates a button, pass the B5 button type, a unique identifier,
+// ButtonNew creates a button, pass the B5 button type,
 // the button text.
 // B5 button types are: "primary", "secondary", "success", "danger",
 // "warning", "info", "light", "dark".
-func (gc *GuiCfg) GWB5ButtonNew(id string, bType string, text string) Elem {
+func (gc *GuiCfg) ButtonNew(bType string, text string) Elem {
+	id := gc.idNew()
 	hText := Sprintf(`
 	<button type="button" class="btn btn-%s m-2" id="%s" onclick="%s_func()">
 	<span id="%stext">%s</span></button>`, bType, id, id, id, text)
@@ -855,8 +883,9 @@ func (gc *GuiCfg) GWB5ButtonNew(id string, bType string, text string) Elem {
 	return e
 }
 
-// GWB5ButtonNew creates a button, pass the B5 type, a unique identifier, the button text.
-func (gc *GuiCfg) GWB5ButtonWithIconNew(id string, bType string, iconName string, text string) Elem {
+// ButtonNew creates a button, pass the B5 type, the button text.
+func (gc *GuiCfg) ButtonWithIconNew(bType string, iconName string, text string) Elem {
+	id := gc.idNew()
 	hText := Sprintf(`
 	<button type="button" class="btn btn-%s m-2" id="%s" onclick="%s_func()">
 	<span class="btn-label">
@@ -877,8 +906,9 @@ func (gc *GuiCfg) GWB5ButtonWithIconNew(id string, bType string, iconName string
 	return e
 }
 
-// GWB5InputTextNew creates a input text field; pass a unique identifier.
-func (gc *GuiCfg) GWB5InputTextNew(id string) Elem {
+// InputTextNew creates a input text field.
+func (gc *GuiCfg) InputTextNew() Elem {
+	id := gc.idNew()
 	hStart := Sprintf(`
 	<input type="text" class="m-2" id="%s" name="%s" onkeypress="%s_func(event)">
 	`, id, id, id)
@@ -898,8 +928,9 @@ func (gc *GuiCfg) GWB5InputTextNew(id string) Elem {
 	return e
 }
 
-// GWB5LabelNew creates a label; pass a unique identifier and the label text.
-func (gc *GuiCfg) GWB5LabelNew(id string, text string) Elem {
+// LabelNew creates a label; pass the label text.
+func (gc *GuiCfg) LabelNew(text string) Elem {
+	id := gc.idNew()
 	hText := Sprintf(`
 	<label class="m-2" id=%s>%s</label>`, id, text)
 	//gc.fh.Write([]byte(hText))
@@ -907,9 +938,10 @@ func (gc *GuiCfg) GWB5LabelNew(id string, text string) Elem {
 	return e
 }
 
-// GWB5TextAreaNew creates a textarea; pass a unique identifier and the number of rows.
+// TextAreaNew creates a textarea; the number of rows.
 // Remember to attach a callback to handle output om the area.
-func (gc *GuiCfg) GWB5TextAreaNew(id string, rows int) Elem {
+func (gc *GuiCfg) TextAreaNew(rows int) Elem {
+	id := gc.idNew()
 	hText := Sprintf(`
 	<div class="form-group mx-2" style="min-width: 90%c">
 	<p><textarea class="form-control" id=%s rows="%d"></textarea></p>

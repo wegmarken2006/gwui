@@ -127,23 +127,27 @@ func (gc *GuiCfg) plyPlotNumNum(id string, xVec []float64, yVec []float64,
 	return e
 }
 
-func (gc *GuiCfg) GWPlyPlotVBar(id string, x []string, y []float64, title string, xTitle string, yTitle string, width int, height int) Elem {
+func (gc *GuiCfg) PlotVBar(x []string, y []float64, title string, xTitle string, yTitle string, width int, height int) Elem {
+	id := gc.idNew()
 	return gc.plyPlotStrNum(id, x, y, "bar", "s", title, xTitle, yTitle, width, height)
 }
 
-func (gc *GuiCfg) GWPlyPlotHBar(id string, x []float64, y []string, title string, xTitle string, yTitle string, width int, height int) Elem {
+func (gc *GuiCfg) PlotHBar(x []float64, y []string, title string, xTitle string, yTitle string, width int, height int) Elem {
+	id := gc.idNew()
 	return gc.plyPlotNumStr(id, x, y, "bar", "s", title, xTitle, yTitle, width, height)
 }
 
-func (gc *GuiCfg) GWPlyPlotLine(id string, x []float64, y []float64, title string, xTitle string, yTitle string, width int, height int) Elem {
+func (gc *GuiCfg) PlotLine(x []float64, y []float64, title string, xTitle string, yTitle string, width int, height int) Elem {
+	id := gc.idNew()
 	return gc.plyPlotNumNum(id, x, y, "", "lines", title, xTitle, yTitle, width, height)
 }
 
-func (gc *GuiCfg) GWPlyPlotScatter(id string, x []float64, y []float64, title string, xTitle string, yTitle string, width int, height int) Elem {
+func (gc *GuiCfg) PlotScatter(x []float64, y []float64, title string, xTitle string, yTitle string, width int, height int) Elem {
+	id := gc.idNew()
 	return gc.plyPlotNumNum(id, x, y, "scatter", "markers", title, xTitle, yTitle, width, height)
 }
 
-func (gc *GuiCfg) GWPlyPlotRedrawY(el Elem, y []float64) {
+func (gc *GuiCfg) PlotRedrawY(el Elem, y []float64) {
 	//Plotly.newPlot(element,charData,layout);
 	if gc.Body.gs != nil {
 		toSend := Sprintf("PREDRAWY@%s@%d", el.id, len(y))
