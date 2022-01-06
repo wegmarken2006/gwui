@@ -136,10 +136,36 @@ func (e *Elem) Callback(fn func(string, int)) {
 					text := Sprintf("wsEndPoint %s, %s", e.id, err)
 					Println(text)
 				}
+				gc := e.gc
+				gc.reader(e)
 				fn("", 0)
 			})
 		}
 	}()
+}
+
+func (gc *GuiCfg) reader(el *Elem) {
+	if el.elType != BodyT {
+		return
+	}
+	var conn *websocket.Conn = el.gs
+	for {
+		// read in a message
+		_, p, err := conn.ReadMessage()
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				//text := Sprintf("reader %s, %d, %s", el.id, el.elType, err)
+				//Println(text)
+				return
+			}
+		}
+		pStr := string(p)
+		if pStr == "CLOSE" {
+			Println("Browser window closed, exiting.")
+			os.Exit(0)
+		}
+
+	}
 }
 
 // idNew generates a unique id
@@ -329,7 +355,11 @@ func (gc *GuiCfg) Init(title string) Elem {
 		}
 
 	};
-	`, addr, e.id, e.id)
+
+	window.onbeforeunload = function(e) {
+		conn_%s.send("CLOSE");
+	};
+	`, addr, e.id, e.id, e.id)
 
 	//attach a callback to body to handle logic -> gui messages
 	e.Callback(func(string, int) {})

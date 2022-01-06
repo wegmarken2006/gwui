@@ -17,8 +17,8 @@ func main() {
 
 	//create first tab elements
 
-	bt1 := gc.ButtonWithIconNew("primary", "brush", "Change")
-	lb1 := gc.LabelNew("Change text color")
+	bt1 := gc.ButtonWithIconNew("primary", "brush", "Start")
+	lb1 := gc.LabelNew("Start TextArea write loop")
 
 	bt2 := gc.ButtonWithIconNew("secondary", "brush-fill", "Change")
 	lb2 := gc.LabelNew("Change text background color")
@@ -74,8 +74,8 @@ func main() {
 	})
 
 	bt1.Callback(func(string, int) {
-		ta1.ChangeColor("red")
-		bt1.ChangeText("Changed")
+		go textLoop(&ta1)
+		bt1.ChangeText("Started")
 		bt1.ChangeToDisable()
 	})
 
@@ -275,21 +275,17 @@ func main() {
 	gc.Close(body)
 	gc.Run()
 
-	//Processing simulation: continuous write in textarea
-	timeD := time.Duration(5000) * time.Millisecond
-	time.Sleep(timeD)
-	go func() {
-		ind := 0
-		for {
-			ind++
-			text := Sprintf("%d: All work and no play ...\n", ind)
-			ta1.WriteTextArea(text)
-			timeD := time.Duration(3000) * time.Millisecond
-			time.Sleep(timeD)
-		}
-
-	}()
-
 	gc.WaitKeyFromCOnsole()
 
+}
+
+func textLoop(textArea *gwui.Elem) {
+	ind := 0
+	for {
+		ind++
+		text := Sprintf("%d: All work and no play ...\n", ind)
+		textArea.WriteTextArea(text)
+		timeD := time.Duration(3000) * time.Millisecond
+		time.Sleep(timeD)
+	}
 }

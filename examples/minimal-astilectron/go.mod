@@ -2,11 +2,10 @@ module mini
 
 go 1.17
 
-
 require (
 	github.com/asticode/go-astikit v0.23.0
 	github.com/asticode/go-astilectron v0.27.0
-	github.com/wegmarken2006/gwui v1.1.1
+	github.com/wegmarken2006/gwui v1.1.3
 )
 
 require (
