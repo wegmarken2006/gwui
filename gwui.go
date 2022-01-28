@@ -839,11 +839,11 @@ type ColSpans struct {
 
 // GridNew creates a container with a row col grid; content is input
 // through an array of ColsSpans (one array element for every row).
-// Use 0 for no span
+// Use nil as *Elem for empty column.
+// Use 0 for no span.
 func (gc *GuiCfg) GridNew(colSpans []ColSpans) Elem {
 	ct := gc.ContainerNew()
 	for _, colSpan := range colSpans {
-		Println(colSpan)
 		row := gc.RowNew()
 		for ind, elem := range colSpan.Elems {
 			var col Elem
