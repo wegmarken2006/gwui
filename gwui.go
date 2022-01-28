@@ -703,8 +703,8 @@ func (gc *GuiCfg) FileInputNew(text string) Elem {
 	return e
 }
 
-// GWParagraphNew creates a paragraph.
-func (gc *GuiCfg) GWParagraphNew() Elem {
+// ParagraphNew creates a paragraph.
+func (gc *GuiCfg) ParagraphNew() Elem {
 	id := gc.idNew()
 	hStart := Sprintf(`
 	<p id="%s">`, id)
@@ -714,7 +714,7 @@ func (gc *GuiCfg) GWParagraphNew() Elem {
 	return e
 }
 
-// GWParagraphNew creates an image tag; pass  the name of the image file,
+// ParagraphNew creates an image tag; pass  the name of the image file,
 // the size. The image file must reside in /static
 func (gc *GuiCfg) ImageNew(fileName string, width int, height int) Elem {
 	id := gc.idNew()
@@ -829,6 +829,38 @@ func (gc *GuiCfg) ContainerNew() Elem {
 	</div>`
 	e := Elem{gc: gc, hStart: hStart, hEnd: hEnd, html: hStart, id: id, elType: ContainerT, js: ""}
 	return e
+}
+
+// Colspans is a struct useful to build grids
+type ColSpans struct {
+	Elems []*Elem
+	Spans []int
+}
+
+// GridNew creates a container with a row col grid; content is input
+// through an array of ColsSpans (one array element for every row).
+// Use 0 for no span
+func (gc *GuiCfg) GridNew(colSpans []ColSpans) Elem {
+	ct := gc.ContainerNew()
+	for _, colSpan := range colSpans {
+		Println(colSpan)
+		row := gc.RowNew()
+		for ind, elem := range colSpan.Elems {
+			var col Elem
+			span := colSpan.Spans[ind]
+			if span != 0 {
+				col = gc.ColSpanNew(span)
+			} else {
+				col = gc.ColNew()
+			}
+			if elem != nil {
+				col.Add(*elem)
+			}
+			row.Add(col)
+		}
+		ct.Add(row)
+	}
+	return ct
 }
 
 // RowNew creates a row.

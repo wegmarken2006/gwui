@@ -8,4 +8,4 @@ require (
 	github.com/wegmarken2006/filepanic v1.0.2
 )
 
-require golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
+require golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect

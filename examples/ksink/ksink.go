@@ -180,39 +180,25 @@ func main() {
 		lb11.ChangeText(strValue)
 	})
 
-	//Grid: container, row(s), ...
-	ct2 := gc.ContainerNew()
-	r1t2 := gc.RowNew()
-	c1t2 := gc.ColSpanNew(2)
-	c2t2 := gc.ColNew()
+	//Use Grid function instead of Col and Row directly
 
-	c1t2.Add(rd1)
-	c2t2.Add(img1)
-	c2t2.Add(img2)
-	c2t2.Add(img3)
-	c2t2.Add(img4)
-	r1t2.Add(c1t2)
-	r1t2.Add(c2t2)
-	ct2.Add(r1t2)
+	par1 := gc.ParagraphNew()
+	par1.Add(img1)
+	par1.Add(img2)
+	par1.Add(img3)
+	par1.Add(img4)
+	colst21 := []*gwui.Elem{&rd1, &par1}
+	spanst21 := []int{2, 0}
+	colst22 := []*gwui.Elem{&pb1, &rs1}
+	spanst22 := []int{2, 0}
+	colst23 := []*gwui.Elem{&fi1, &lb11}
+	spanst23 := []int{0, 2}
 
-	r2t2 := gc.RowNew()
-	c3t2 := gc.ColSpanNew(2)
-	c4t2 := gc.ColNew()
-	c3t2.Add(pb1)
-	c4t2.Add(rs1)
-	r2t2.Add(c3t2)
-	r2t2.Add(c4t2)
-	ct2.Add(r2t2)
+	rowst2 := []gwui.ColSpans{{Elems: colst21, Spans: spanst21},
+		{Elems: colst22, Spans: spanst22},
+		{Elems: colst23, Spans: spanst23}}
+	ct2 := gc.GridNew(rowst2)
 
-	r3t2 := gc.RowNew()
-	c5t2 := gc.ColNew()
-	c6t2 := gc.ColSpanNew(2)
-
-	c5t2.Add(fi1)
-	c6t2.Add(lb11)
-	r3t2.Add(c5t2)
-	r3t2.Add(c6t2)
-	ct2.Add(r3t2)
 	tabs.SubElems[1].Add(ct2)
 	tabs.SubElems[1].SetBackgroundColor("white")
 
