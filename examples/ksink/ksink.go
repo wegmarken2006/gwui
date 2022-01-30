@@ -2,6 +2,7 @@ package main
 
 import (
 	. "fmt"
+	"strings"
 	"time"
 
 	"github.com/wegmarken2006/gwui"
@@ -225,12 +226,24 @@ func main() {
 
 	rs2 := gc.RangeSliderNew(1.0, 1.0, 100.0, 1.0)
 
+	upper := true
 	rs2.Callback(func(strValue string, intValue int) {
 		for ind, yElem := range y2Original {
 			y2[ind] = yElem + float64(intValue)
 			gc.PlotRedrawY(pl1, y2)
 			gc.PlotRedrawY(pl2, y2)
-			gc.PlotRedrawY(pl3, y2)
+			if upper {
+				for ind, elem := range xs2 {
+					xs2[ind] = strings.ToUpper(elem)
+				}
+				upper = false
+			} else {
+				for ind, elem := range xs2 {
+					xs2[ind] = strings.ToLower(elem)
+				}
+				upper = true
+			}
+			gc.PlotRedrawXsY(pl3, xs2, y2)
 		}
 	})
 

@@ -251,6 +251,7 @@ func (gc *GuiCfg) PlotScatter(x []float64, y []float64, title string, xTitle str
 	return gc.plyPlotNumNum(id, x, y, "scatter", "markers", title, xTitle, yTitle, width, height)
 }
 
+// PlotRedrawY updates a chart with new numeric y array
 func (gc *GuiCfg) PlotRedrawY(el Elem, y []float64) {
 	//Plotly.newPlot(element,charData,layout);
 	if gc.Body.gs != nil {
@@ -258,6 +259,27 @@ func (gc *GuiCfg) PlotRedrawY(el Elem, y []float64) {
 		for _, yElem := range y {
 			toSend = Sprintf("%s@%7.2f", toSend, yElem)
 		}
+		gc.mutex.Lock()
+		defer gc.mutex.Unlock()
+		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
+	} else {
+		Println("Failed Redraw, Set", gc.Body.id, "Callback!")
+	}
+}
+
+// PlotRedrawXsY updates a chart with new string x array
+// and new numeric y array
+func (gc *GuiCfg) PlotRedrawXsY(el Elem, x []string, y []float64) {
+	//Plotly.newPlot(element,charData,layout);
+	if gc.Body.gs != nil {
+		toSend := Sprintf("PREDRAWXSY@%s@%d", el.id, len(y))
+		for _, yElem := range y {
+			toSend = Sprintf("%s@%7.2f", toSend, yElem)
+		}
+		for _, xElem := range x {
+			toSend = Sprintf("%s@%s", toSend, xElem)
+		}
+
 		gc.mutex.Lock()
 		defer gc.mutex.Unlock()
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))

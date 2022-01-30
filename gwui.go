@@ -345,12 +345,26 @@ func (gc *GuiCfg) Init(title string) Elem {
 			item.src = src;
 		}
 		else if (type === "PREDRAWY") {
-			var len = messages[2];
+			var len = parseInt(messages[2], 10);
 			var yVec = new Float32Array(len);
 			for (ind = 0; ind < len; ind++) {
 				yVec[ind] = parseFloat(messages[3+ind]);
 			}
 			window["data" + id][0].y = yVec;
+			Plotly.newPlot(window["PLOT"+id], window["data"+id], window["layout"+id]);
+		}
+		else if (type === "PREDRAWXSY") {
+			var len = parseInt(messages[2], 10);
+			var yVec = new Float32Array(len);
+			var xVec = new Array(len);;
+			for (ind = 0; ind < len; ind++) {
+				yVec[ind] = parseFloat(messages[3+ind]);
+			}
+			for (ind = 0; ind < len; ind++) {
+				xVec[ind] = messages[len+3+ind];
+			}
+			window["data" + id][0].y = yVec;
+			window["data" + id][0].x = xVec;
 			Plotly.newPlot(window["PLOT"+id], window["data"+id], window["layout"+id]);
 		}
 
