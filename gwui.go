@@ -64,15 +64,16 @@ type Elem struct {
 	gc        *GuiCfg
 }
 type GuiCfg struct {
-	fh           fp.File
-	fjs          fp.File
-	fcss         fp.File
-	mutex        sync.Mutex
-	idCnt        int
-	Body         *Elem
-	ServeURL     string
-	BrowserStart bool
-	PlotIncluded bool
+	fh                fp.File
+	fjs               fp.File
+	fcss              fp.File
+	mutex             sync.Mutex
+	idCnt             int
+	Body              *Elem
+	ServeURL          string
+	BrowserStart      bool `default:"true"`
+	PlotIncluded      bool `default:"false"`
+	ExitOnWindowClose bool `default:"false"`
 }
 
 func (e *Elem) Add(n Elem) {
@@ -164,7 +165,6 @@ func (gc *GuiCfg) reader(el *Elem) {
 			Println("Browser window closed, exiting.")
 			os.Exit(0)
 		}
-
 	}
 }
 
@@ -184,7 +184,12 @@ func (gc *GuiCfg) Run() {
 		os.Exit(0)
 	}
 
-	go http.Serve(listener, nil)
+	go func() {
+		err := http.Serve(listener, nil)
+		if err != nil {
+			Println("Error Serving:", err)
+		}
+	}()
 	gc.ServeURL = Sprintf("http://%s", listener.Addr())
 	text := Sprintf("Serving on %s", gc.ServeURL)
 	Println(text)
@@ -369,11 +374,15 @@ func (gc *GuiCfg) Init(title string) Elem {
 		}
 
 	};
+	`, addr, e.id, e.id)
 
-	window.onbeforeunload = function(e) {
-		conn_%s.send("CLOSE");
-	};
-	`, addr, e.id, e.id, e.id)
+	if gc.ExitOnWindowClose {
+		e.js = Sprintf(`%s
+		window.onbeforeunload = function(e) {
+			conn_%s.send("CLOSE");
+		};
+		`, e.js, e.id)
+	}
 
 	//attach a callback to body to handle logic -> gui messages
 	e.Callback(func(string, int) {})

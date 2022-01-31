@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	gc := gwui.GuiCfg{BrowserStart: true, PlotIncluded: true}
+	gc := gwui.GuiCfg{BrowserStart: true, PlotIncluded: true, ExitOnWindowClose: false}
 	body := gc.Init("gwui test")
 	body.SetBackgroundImage("abstract.jpg", 95)
 
