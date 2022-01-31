@@ -28,7 +28,7 @@ func main() {
 	lb3 := gc.LabelNew("Change text size")
 
 	lb4 := gc.LabelNew("Input text with Modal")
-	it4 := gc.InputTextNew()
+	it4 := gc.InputTextNew("text")
 
 	lb5 := gc.LabelNew("Select font family")
 

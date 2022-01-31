@@ -1002,11 +1002,12 @@ func (gc *GuiCfg) ButtonWithIconNew(bType string, iconName string, text string) 
 }
 
 // InputTextNew creates a input text field.
-func (gc *GuiCfg) InputTextNew() Elem {
+// Pass in input the initial value.
+func (gc *GuiCfg) InputTextNew(iniText string) Elem {
 	id := gc.idNew()
 	hStart := Sprintf(`
-	<input type="text" class="m-2" id="%s" name="%s" onkeypress="%s_func(event)">
-	`, id, id, id)
+	<input type="text" class="m-2" id="%s" name="%s" value="%s" style="text-align: right;" onkeypress="%s_func(event)">
+	`, id, id, iniText, id)
 	e := Elem{gc: gc, hStart: hStart, hEnd: "", html: hStart, id: id, elType: ITextT}
 	addr := Sprintf("/%s", e.id)
 	e.js = Sprintf(`
