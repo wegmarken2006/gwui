@@ -146,7 +146,7 @@ func (e *Elem) Callback(fn func(string, int)) {
 }
 
 func (gc *GuiCfg) reader(el *Elem) {
-	if el.elType != BodyT {
+	if el.elType != BodyT || !gc.ExitOnWindowClose {
 		return
 	}
 	var conn *websocket.Conn = el.gs
@@ -372,17 +372,12 @@ func (gc *GuiCfg) Init(title string) Elem {
 			window["data" + id][0].x = xVec;
 			Plotly.newPlot(window["PLOT"+id], window["data"+id], window["layout"+id]);
 		}
-
 	};
-	`, addr, e.id, e.id)
+	window.onbeforeunload = function(e) {
+		conn_%s.send("CLOSE");
+	};
 
-	if gc.ExitOnWindowClose {
-		e.js = Sprintf(`%s
-		window.onbeforeunload = function(e) {
-			conn_%s.send("CLOSE");
-		};
-		`, e.js, e.id)
-	}
+	`, addr, e.id, e.id, e.id)
 
 	//attach a callback to body to handle logic -> gui messages
 	e.Callback(func(string, int) {})
