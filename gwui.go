@@ -1064,7 +1064,7 @@ func (gc *GuiCfg) TextAreaNew(rows int) Elem {
 				}
 			}
 		}
-		if messages.length === 0 {
+		if ((messages.length == 1) && (messages[0] == '')){
 			text.value = "";
 		}
 		text.scrollTop = text.scrollHeight;
