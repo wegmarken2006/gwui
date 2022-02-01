@@ -372,6 +372,10 @@ func (gc *GuiCfg) Init(title string) Elem {
 			window["data" + id][0].x = xVec;
 			Plotly.newPlot(window["PLOT"+id], window["data"+id], window["layout"+id]);
 		}
+		else if (type === "FORCEC") {
+			var fun = window[id+"_func"];
+			fun();
+		}
 	};
 	window.onbeforeunload = function(e) {
 		conn_%s.send("CLOSE");
@@ -409,6 +413,21 @@ func (el *Elem) ChangeToDisable() {
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
 		Println("Failed Disable, Set", gc.Body.id, "Callback!")
+	}
+}
+
+// ForceCallback forces a call to the element Callback function.
+// It can be used to simulate e button press.
+func (el *Elem) ForceCallback() {
+	gc := el.gc
+
+	if gc.Body.gs != nil {
+		toSend := Sprintf("FORCEC@%s", el.id)
+		gc.mutex.Lock()
+		defer gc.mutex.Unlock()
+		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
+	} else {
+		Println("Failed Forced Callback, Set", gc.Body.id, "Callback!")
 	}
 }
 
