@@ -220,6 +220,21 @@ func (gc *GuiCfg) Run() {
 			Println("Something went wrong with the browser")
 		}()
 	}
+
+	//wait until body callback completed
+	count := 0
+	for {
+		if gc.Body.gs != nil {
+			return
+		}
+		timeD := time.Duration(100) * time.Millisecond
+		time.Sleep(timeD)
+		count++
+		if count > 200 {
+			Println("20 seconds passed and no body callback")
+			return
+		}
+	}
 }
 
 // Close writes and closes web2.html and web2.js, where the
@@ -235,8 +250,6 @@ func (gc *GuiCfg) Close(body Elem) {
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	http.Handle("/", http.FileServer(http.Dir("./static")))
-	//Println("Close")
-
 }
 
 func (gc *GuiCfg) WaitKeyFromCOnsole() {
@@ -254,7 +267,7 @@ func (gc *GuiCfg) WaitKeyFromCOnsole() {
 	}
 }
 
-// Init creates web2.html and wen2.js files and returns the Body element.
+// Init creates web2.html and web2.js files and returns the Body element.
 func (gc *GuiCfg) Init(title string) Elem {
 
 	gc.idCnt = 0 //unique id counter
@@ -372,9 +385,10 @@ func (gc *GuiCfg) Init(title string) Elem {
 			window["data" + id][0].x = xVec;
 			Plotly.newPlot(window["PLOT"+id], window["data"+id], window["layout"+id]);
 		}
-		else if (type === "FORCEC") {
+		else if (type === "CLICK") {
 			var fun = window[id+"_func"];
 			fun();
+			//item.click();
 		}
 	};
 	window.onbeforeunload = function(e) {
@@ -416,18 +430,17 @@ func (el *Elem) ChangeToDisable() {
 	}
 }
 
-// ForceCallback forces a call to the element Callback function.
-// It can be used to simulate e button press.
-func (el *Elem) ForceCallback() {
+// Click forces a click.
+func (el *Elem) Click() {
 	gc := el.gc
 
 	if gc.Body.gs != nil {
-		toSend := Sprintf("FORCEC@%s", el.id)
+		toSend := Sprintf("CLICK@%s", el.id)
 		gc.mutex.Lock()
 		defer gc.mutex.Unlock()
 		gc.Body.gs.WriteMessage(websocket.TextMessage, []byte(toSend))
 	} else {
-		Println("Failed Forced Callback, Set", gc.Body.id, "Callback!")
+		Println("Failed Click, Set", gc.Body.id, "Callback!")
 	}
 }
 
