@@ -827,7 +827,7 @@ func (gc *GuiCfg) ModalNew(title string, text string, bt1Text string, bt2Text st
 
 // ModalPasswordNew creates a Modal Dialog fro password input;
 // pass the dialog title and the  button text.
-func (gc *GuiCfg) ModaPasswordlNew(title string, bt1Text string) Elem {
+func (gc *GuiCfg) ModalPasswordNew(title string, bt1Text string) Elem {
 	id1 := gc.idNew()
 	id2 := gc.idNew()
 	hStart := Sprintf(`

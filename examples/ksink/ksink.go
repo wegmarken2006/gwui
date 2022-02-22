@@ -36,7 +36,7 @@ func main() {
 		"Font Family", []string{"arial", "verdana", "monospace"})
 
 	md1 := gc.ModalNew("TEXT INPUT", "Are you sure", "yes", "no")
-	md2 := gc.ModaPasswordlNew("Type anything", "Submit")
+	md2 := gc.ModalPasswordNew("Type anything", "Submit")
 
 	ta1 := gc.TextAreaNew(12)
 	//mandatory: callback on textarea to handle incoming messages
