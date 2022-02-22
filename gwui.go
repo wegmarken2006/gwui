@@ -257,7 +257,10 @@ func (gc *GuiCfg) WaitKeyFromCOnsole() {
 	reader := bufio.NewReader(os.Stdin)
 	Println("Press:\n q<Enter> to exit")
 	for {
-		text, _ := reader.ReadString('\n')
+		text, err := reader.ReadString('\n')
+		if err != nil {
+			os.Exit(0)
+		}
 		//cut final 0xd, 0xa
 		text = text[:len(text)-2]
 		switch text {
@@ -818,6 +821,53 @@ func (gc *GuiCfg) ModalNew(title string, text string, bt1Text string, bt2Text st
 		xhr.send();
 	}
 	`, id1, addr1, id2, addr2)
+
+	return e
+}
+
+// ModalPasswordNew creates a Modal Dialog fro password input;
+// pass the dialog title and the  button text.
+func (gc *GuiCfg) ModaPasswordlNew(title string, bt1Text string) Elem {
+	id1 := gc.idNew()
+	id2 := gc.idNew()
+	hStart := Sprintf(`
+	<div class="modal" tabindex="-1" id="%s%s">
+	<div class="modal-dialog">
+	  <div class="modal-content">
+		<div class="modal-header">
+		  <h5 class="modal-title">%s</h5>
+		</div>
+		<div class="modal-body">
+		  <form>
+		   <div class="mb-3">
+		    <label for="exampleInputPassword1" class="form-label">Password</label>
+		    <input type="password" class="form-control" id="%s">
+		   </div>
+		  </form>
+		</div>
+		<div class="modal-footer">
+		  <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="%s_func()">%s</button>
+		</div>
+	  </div>
+	</div>
+	</div>`, id1, id2, title, id2, id1, bt1Text)
+
+	e := Elem{gc: gc, hStart: hStart, hEnd: "", html: hStart, id: id1 + id2,
+		elType: ModalT, js: ""}
+	e1 := Elem{gc: gc, id: id1, elType: ITextT}
+	//e2 := Elem{gc: gc, id: id2, elType: ITextT}
+	//e.SubElems = []Elem{e1, e2}
+	e.SubElems = []Elem{e1}
+	addr1 := Sprintf("/%s", id1)
+	//addr2 := Sprintf("/%s", id2)
+	e.js = Sprintf(`
+	function %s_func() {
+		xhr = new XMLHttpRequest();
+		xhr.open("POST", "%s", true);
+		var val = document.getElementById("%s").value;
+		xhr.send(val);
+	}
+	`, id1, addr1, id2)
 
 	return e
 }

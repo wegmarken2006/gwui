@@ -36,6 +36,7 @@ func main() {
 		"Font Family", []string{"arial", "verdana", "monospace"})
 
 	md1 := gc.ModalNew("TEXT INPUT", "Are you sure", "yes", "no")
+	md2 := gc.ModaPasswordlNew("Type anything", "Submit")
 
 	ta1 := gc.TextAreaNew(12)
 	//mandatory: callback on textarea to handle incoming messages
@@ -61,6 +62,11 @@ func main() {
 		md1.ChanBool1 <- false
 	})
 
+	md2.SubElems[0].Callback(func(strValue string, intValue int) {
+		text := Sprintf("Password: %s\n", strValue)
+		ta1.WriteTextArea(text)
+	})
+
 	it4.Callback(func(strValue string, intValue int) {
 		md1.ModalShow()
 		yes := <-md1.ChanBool1
@@ -75,6 +81,7 @@ func main() {
 	})
 
 	bt1.Callback(func(string, int) {
+		md2.ModalShow()
 		go textLoop(&ta1)
 		bt1.ChangeText("Started")
 		bt1.ChangeToDisable()
@@ -270,6 +277,7 @@ func main() {
 	//final body additions; add modal to body directly
 	body.Add(tabs)
 	body.Add(md1)
+	body.Add(md2)
 
 	gc.Close(body)
 	gc.Run()
