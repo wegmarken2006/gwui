@@ -1124,30 +1124,30 @@ func (gc *GuiCfg) TextAreaNew(rows int) Elem {
 
 	addr := Sprintf("/%s", e.id)
 	e.js = Sprintf(`
-	var text = document.getElementById("%s");
-	var addr1 = "ws://" + document.location.host + "%s";
-	conn_%s = new WebSocket(addr1);
+	var text_%s = document.getElementById("%s");
+	var addr1_%s = "ws://" + document.location.host + "%s";
+	conn_%s = new WebSocket(addr1_%s);
 	conn_%s.onmessage = function (evt) {
 		var edata = evt.data;
 		var messages = edata.split('\n');
 		for (var i = 0; i < messages.length; i++) {
 			if (messages[i] != "") {
 				var str = messages[i];
-				str = text.value + str;
+				str = text_%s.value + str;
 				diff = str.length - 4096;
 				if (diff > 0) {
-					text.value = str.slice(diff) + '\n';
+					text_%s.value = str.slice(diff) + '\n';
 				} else {
-					text.value = str + '\n';
+					text_%s.value = str + '\n';
 				}
 			}
 		}
 		if ((messages.length == 1) && (messages[0] == '')){
-			text.value = "";
+			text_%s.value = "";
 		}
-		text.scrollTop = text.scrollHeight;
+		text_%s.scrollTop = text_%s.scrollHeight;
 	};
-	`, e.id, addr, e.id, e.id)
+	`, e.id, e.id, e.id, addr, e.id, e.id, e.id, e.id, e.id, e.id, e.id, e.id, e.id)
 
 	return e
 }
