@@ -261,10 +261,7 @@ func (gc *GuiCfg) WaitKeyFromCOnsole() {
 		if err != nil {
 			os.Exit(0)
 		}
-		//cut final 0xd, 0xa
-		text = text[:len(text)-2]
-		switch text {
-		case "q", "Q":
+		if strings.HasPrefix(text, "q") || strings.HasPrefix(text, "Q"){
 			os.Exit(0)
 		}
 	}
