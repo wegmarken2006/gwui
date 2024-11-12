@@ -147,7 +147,7 @@ func (gc *GuiCfg) plyPlotNumNumMulti(id string, xVec []float64, yVec [][]float64
 	for line := 0; line < lines; line++ {
 		xStr := "["
 		yStr := "["
-		for ind, xElem := range xVec[line] {
+		for ind, xElem := range xVec {
 			xStr = Sprintf("%s%7.2f, ", xStr, xElem)
 			yStr = Sprintf("%s%7.2f, ", yStr, yVec[line][ind])
 		}
